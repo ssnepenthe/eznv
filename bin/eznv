@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+
+use Eznv\Command\ComposerCommand;
+use Eznv\Command\DestroyCommand;
+use Eznv\Command\InfoCommand;
+use Eznv\Command\InitCommand;
+use Eznv\Command\ListCommand;
+use Eznv\Command\ServeCommand;
+use Eznv\Command\ShellCommand;
+use Eznv\Command\WpCommand;
+use Symfony\Component\Console\Application;
+
+$autoloader = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
+
+if (! file_exists($autoloader)) {
+    echo 'Autoloader not found. Please run "composer install".' . PHP_EOL;
+    exit(1);
+}
+
+require $autoloader;
+
+$application = new Application;
+$application->addCommands([
+    new ComposerCommand,
+    new DestroyCommand,
+    new InfoCommand,
+    new InitCommand,
+    new ListCommand,
+    new ServeCommand,
+    new ShellCommand,
+    new WpCommand,
+]);
+$application->run();

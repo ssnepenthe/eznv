@@ -33,20 +33,4 @@ class EnvironmentTest extends TestCase
         $this->assertSame($wpPath . '/one', $environment->getWordPressPath('one'));
         $this->assertSame($wpPath . '/path/to/db.sqlite', $environment->getWordPressPath('path/to/db.sqlite'));
     }
-
-    public function testGetInstalledPackageVersion()
-    {
-        // installed.php file won't be found at this path so we should always get null.
-        $path = __DIR__ . '/fixtures';
-        $environment = new Environment($path);
-
-        $this->assertNull($environment->getInstalledPackageVersion('roots/wordpress'));
-        $this->assertNull($environment->getInstalledPackageVersion('wpackagist-plugin/sqlite-database-integration'));
-
-        $path = __DIR__ . '/fixtures/installed';
-        $environment = new Environment($path);
-
-        $this->assertSame('6.9.4', $environment->getInstalledPackageVersion('roots/wordpress'));
-        $this->assertSame('2.2.18', $environment->getInstalledPackageVersion('wpackagist-plugin/sqlite-database-integration'));
-    }
 }

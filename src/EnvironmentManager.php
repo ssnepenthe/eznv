@@ -10,8 +10,6 @@ use RuntimeException;
 // @todo createForProjectId() method?
 final class EnvironmentManager
 {
-    private static string $baseDirectory = '';
-
     public function createForDirectory(string $directory, bool $validate = false): Environment
     {
         // @todo realpath()?
@@ -33,14 +31,14 @@ final class EnvironmentManager
 
     public function createForProject(Project $project, bool $validate = false)
     {
-        $directory = $this->path($project->hash);
+        $directory = Eznv::instance()->path($project->hash);
 
         return $this->createForDirectory($directory, $validate);
     }
 
     public function createForProjectHash(string $id, bool $validate = false)
     {
-        $directory = $this->path($id);
+        $directory = Eznv::instance()->path($id);
 
         return $this->createForDirectory($directory, $validate);
     }
@@ -113,36 +111,5 @@ final class EnvironmentManager
         if (false === $written) {
             throw new RuntimeException("Failed to write wp-cli.yml in {$environment->path}");
         }
-    }
-
-    public static function getBaseDirectory()
-    {
-        if ('' === self::$baseDirectory) {
-            $xdgDataHome = Support::getEnv('XDG_DATA_HOME');
-
-            if ($xdgDataHome && is_dir($xdgDataHome)) {
-                $dir = $xdgDataHome . '/eznv';
-            } else {
-                $home = Support::getEnv('HOME');
-
-                if (! $home) {
-                    throw new \RuntimeException('Could not determine home directory. Please set HOME or XDG_DATA_HOME environment variable.');
-                }
-
-                $dir = $home . '/.eznv';
-            }
-
-            self::$baseDirectory = $dir;
-        }
-
-        return self::$baseDirectory;
-    }
-
-    public static function path(string ...$pathParts): string
-    {
-        $pathParts = array_map(fn ($part) => trim($part, '/\\'), array_filter($pathParts));
-        $path = implode('/', $pathParts);
-
-        return self::getBaseDirectory() . "/{$path}";
     }
 }

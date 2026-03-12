@@ -9,7 +9,7 @@ use Eznv\Command\ListCommand;
 use Eznv\Command\ServeCommand;
 use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
-use Eznv\EnvironmentManager;
+use Eznv\Eznv;
 use Eznv\Support;
 use Symfony\Component\Console\Application;
 
@@ -22,7 +22,7 @@ if (! file_exists($autoloader)) {
 
 require $autoloader;
 
-Support::ensureDirectoryExists(EnvironmentManager::getBaseDirectory());
+Support::ensureDirectoryExists(Eznv::instance()->baseDirectory);
 
 $application = new Application;
 $application->addCommands([

@@ -4,13 +4,13 @@ namespace Eznv\Command;
 
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
-use Eznv\Process;
+use Eznv\ProcessFactory;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process as SymfonyProcess;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'shell')]
 final class ShellCommand
@@ -19,7 +19,7 @@ final class ShellCommand
         SymfonyStyle $io,
         #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
     ): int {
-        if (! SymfonyProcess::isTtySupported()) {
+        if (! Process::isTtySupported()) {
             $io->error('TTY support is required');
 
             return Command::FAILURE;
@@ -53,7 +53,7 @@ final class ShellCommand
         $io->writeln('');
 
         // @todo Environment variable to indicate we are in an eznv shell? Can't really think of a need for that at the moment.
-        $process = (new Process($environment->path))
+        $process = (new ProcessFactory($environment->path))
             ->create($shell, '-l', '-i') // @todo verify login and interactive flags are the same across shells?
             ->setTty(true)
             ->setEnv($_ENV) // @todo Any reason we SHOULD NOT be inheriting environment?

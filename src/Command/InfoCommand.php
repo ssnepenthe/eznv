@@ -5,7 +5,7 @@ namespace Eznv\Command;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\Eznv;
-use Eznv\Process;
+use Eznv\ProcessFactory;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -47,7 +47,7 @@ final class InfoCommand
 
         $dataDirectory = Eznv::instance()->baseDirectory;
 
-        $processFactory = new Process($environment->path);
+        $processFactory = new ProcessFactory($environment->path);
         $wpVersionProcess = $processFactory->create('wp', 'core', 'version')->mustRun();
         $sqliteVersionProcess = $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version')->mustRun();
 

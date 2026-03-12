@@ -4,7 +4,7 @@ namespace Eznv\Command;
 
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
-use Eznv\Process;
+use Eznv\ProcessFactory;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process as SymfonyProcess;
+use Symfony\Component\Process\Process;
 
 // @todo is this redundant given our wp proxy command? I feel like the wp proxy command is just a nice-to-have whereas
 // the serve command is basically half the point of this eznv package...
@@ -47,12 +47,12 @@ final class ServeCommand
         // @todo configurable port at minimum.
         // @todo what if we sent to background and redirected all output to log file?
         // @todo set PHP_CLI_SERVER_WORKERS env var by default? Or at least recommend user to set it.
-        (new Process($environment->path))
+        (new ProcessFactory($environment->path))
             ->create('wp', 'server')
-            ->setTty(SymfonyProcess::isTtySupported()) // @todo Don't remember why we set TTY mode, but don't think we need it.
+            ->setTty(Process::isTtySupported()) // @todo Don't remember why we set TTY mode, but don't think we need it.
             ->setTimeout(null)
             ->run(function ($type, $buffer) use ($errorOutput, $output): void {
-                if (SymfonyProcess::ERR === $type) {
+                if (Process::ERR === $type) {
                     $errorOutput->write($buffer);
                 } else {
                     $output->write($buffer);

@@ -4,7 +4,7 @@ namespace Eznv\Command;
 
 use Closure;
 use Eznv\EnvironmentManager;
-use Eznv\Process;
+use Eznv\ProcessFactory;
 use Eznv\Support;
 use Eznv\Template;
 use InvalidArgumentException;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Helper\DebugFormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process as SymfonyProcess;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'init', description: 'Initialize a WordPress environment for the current directory')]
 final class InitCommand
@@ -67,7 +67,7 @@ final class InitCommand
         );
 
         // @todo error handling after running processes?
-        $processFactory = new Process($environment->path);
+        $processFactory = new ProcessFactory($environment->path);
 
         $this->step(
             label: 'Installing environment dependencies',
@@ -136,16 +136,16 @@ final class InitCommand
         return Command::SUCCESS;
     }
 
-    private function step(string $label, ?Closure $step = null, ?SymfonyProcess $process = null, ?Closure $isSuccess = null)
+    private function step(string $label, ?Closure $step = null, ?Process $process = null, ?Closure $isSuccess = null)
     {
         if ((null === $step && null === $process) || (null !== $step && null !== $process)) {
             throw new InvalidArgumentException('Must call "step" with only one of "step" or "process" args');
         }
 
         // @todo Would itmake more sense to just print the command we are running and then dump the raw output of that command?
-        if ($process instanceof SymfonyProcess) {
+        if ($process instanceof Process) {
             $step = fn () => $this->getProcessHelper()->run($this->io, $process);
-            $isSuccess ??= fn (SymfonyProcess $process) => $process->isSuccessful();
+            $isSuccess ??= fn (Process $process) => $process->isSuccessful();
         }
 
         $isSuccess ??= fn () => true;

@@ -4,7 +4,7 @@ namespace Eznv\Command;
 
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
-use Eznv\Process;
+use Eznv\ProcessFactory;
 use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process as SymfonyProcess;
+use Symfony\Component\Process\Process;
 
 // @todo would be nice to be able to pass an env identifier when calling proxy commands instead of only working in current dir.
 abstract class ProxyCommand extends Command
@@ -59,15 +59,15 @@ abstract class ProxyCommand extends Command
             return Command::FAILURE;
         }
 
-        $process = (new Process($environment->path))
+        $process = (new ProcessFactory($environment->path))
             ->create($this->getProxyCommand(), ...$input->getRawTokens(true))
             // @todo notify user if not supported they can't use interactive commands?
-            ->setTty(SymfonyProcess::isTtySupported());
+            ->setTty(Process::isTtySupported());
 
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 
         $process->run(function ($type, $buffer) use ($errorOutput, $output): void {
-            if (SymfonyProcess::ERR === $type) {
+            if (Process::ERR === $type) {
                 $errorOutput->write($buffer);
             } else {
                 $output->write($buffer);

@@ -5,7 +5,7 @@ namespace Eznv;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
-final class Process
+final class ProcessFactory
 {
     private static array $foundExecutables = [];
 

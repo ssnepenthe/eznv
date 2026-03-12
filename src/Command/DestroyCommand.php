@@ -14,8 +14,10 @@ use Symfony\Component\Filesystem\Filesystem;
 #[AsCommand(name: 'destroy', description: 'Destroy the environment for the current directory')]
 final class DestroyCommand
 {
-    public function __invoke(SymfonyStyle $io, #[Argument] string $identifier = ''): int
-    {
+    public function __invoke(
+        SymfonyStyle $io,
+        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
+    ): int {
         if ('' === $identifier) {
             $identifier = getcwd();
         }

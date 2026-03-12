@@ -5,6 +5,7 @@ namespace Eznv\Command;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\Process;
+use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,8 +19,11 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 #[AsCommand(name: 'serve', description: 'Start a WordPress server for the current directory.')]
 final class ServeCommand
 {
-    public function __invoke(OutputInterface $output, SymfonyStyle $io, #[Argument] string $identifier = ''): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        SymfonyStyle $io,
+        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
+    ): int {
         if ('' === $identifier) {
             $identifier = getcwd();
         }

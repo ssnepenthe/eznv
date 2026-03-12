@@ -3,6 +3,7 @@
 namespace Eznv;
 
 use RuntimeException;
+use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class Support
@@ -70,5 +71,33 @@ final class Support
         $decoded = json_decode($contents, true, flags: JSON_THROW_ON_ERROR);
 
         return $decoded;
+    }
+
+    public static function suggestEnvironmentIdentifiers(CompletionInput $input): array
+    {
+        $currentValue = $input->getCompletionValue();
+        $suggestions = [];
+        $environments = (new EnvironmentFinder)->findAll();
+
+        if ('' === $currentValue) {
+            foreach ($environments as $environment) {
+                // The user hasn't typed anything yet so let's just provide name for a clean but descriptive identifier.
+                // @todo Does it make more sense to provide name or path?
+                $suggestions[] = $environment->project->name;
+            }
+
+            return $suggestions;
+        }
+
+        foreach ((new EnvironmentFinder)->findAll() as $environment) {
+            // We are skipping hash intentionally - easier to just use id.
+            foreach (['path', 'name', 'id'] as $prop) {
+                if (str_starts_with($environment->project->{$prop}, $currentValue)) {
+                    $suggestions[] = $environment->project->{$prop};
+                }
+            }
+        }
+
+        return $suggestions;
     }
 }

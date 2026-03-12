@@ -14,8 +14,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'info', description: 'Display information about the current WordPress environment')]
 final class InfoCommand
 {
-    public function __invoke(SymfonyStyle $io, #[Argument] string $identifier = ''): int
-    {
+    public function __invoke(
+        SymfonyStyle $io,
+        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
+    ): int {
         if ('' === $identifier) {
             $identifier = getcwd();
         }

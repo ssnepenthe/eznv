@@ -15,8 +15,10 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 #[AsCommand(name: 'shell')]
 final class ShellCommand
 {
-    public function __invoke(SymfonyStyle $io, #[Argument] string $identifier = ''): int
-    {
+    public function __invoke(
+        SymfonyStyle $io,
+        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
+    ): int {
         if (! SymfonyProcess::isTtySupported()) {
             $io->error('TTY support is required');
 

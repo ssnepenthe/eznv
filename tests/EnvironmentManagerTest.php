@@ -13,13 +13,13 @@ class EnvironmentManagerTest extends TestCase
         $environmentManager = new EnvironmentManager();
 
         $path = __DIR__ . '/fixtures/environment';
-        $environment = $environmentManager->createForDirectory($path, validate: false);
+        $environment = $environmentManager->createForDirectory($path);
 
         $this->assertSame($path, $environment->path);
         $this->assertNull($environment->projectPath);
 
         $path = __DIR__ . '/fixtures/initialized-environment';
-        $environment = $environmentManager->createForDirectory($path, validate: false);
+        $environment = $environmentManager->createForDirectory($path);
 
         $this->assertSame($path, $environment->path);
         $this->assertSame('/some/random/path', $environment->projectPath);
@@ -30,7 +30,7 @@ class EnvironmentManagerTest extends TestCase
         $environmentManager = new EnvironmentManager();
         $project = new Project('/some/random/path', 'vendor/name', 'library');
 
-        $environment = $environmentManager->createForProject($project, validate: false);
+        $environment = $environmentManager->createForProject($project);
 
         // Environment path won't exist, therefore composer.json won't exists, so project path won't be set on environment...
         // Maybe we can revisit at some point with virtual file system in place?
@@ -43,7 +43,7 @@ class EnvironmentManagerTest extends TestCase
         $projectPath = '/some/random/path';
         $projectId = hash('sha256', $projectPath);
 
-        $environment = $environmentManager->createForProjectHash($projectId, validate: false);
+        $environment = $environmentManager->createForProjectHash($projectId);
 
         // Environment path won't exist, therefore composer.json won't exists, so project path won't be set on environment...
         // Maybe we can revisit at some point with virtual file system in place?

@@ -10,7 +10,7 @@ use RuntimeException;
 // @todo createForProjectId() method?
 final class EnvironmentManager
 {
-    public function createForDirectory(string $directory, bool $validate = false): Environment
+    public function createForDirectory(string $directory): Environment
     {
         // @todo realpath()?
         $environment = new Environment($directory);
@@ -21,26 +21,21 @@ final class EnvironmentManager
             $environment->projectPath = $composer['extra']['eznv']['project'] ?? null;
         }
 
-        // @todo We might not actually need this... We are manually ensuring directory exists in init command.
-        if ($validate) {
-            Support::ensureDirectoryExists($environment->path);
-        }
-
         return $environment;
     }
 
-    public function createForProject(Project $project, bool $validate = false)
+    public function createForProject(Project $project)
     {
         $directory = Eznv::instance()->path($project->hash);
 
-        return $this->createForDirectory($directory, $validate);
+        return $this->createForDirectory($directory);
     }
 
-    public function createForProjectHash(string $id, bool $validate = false)
+    public function createForProjectHash(string $id)
     {
         $directory = Eznv::instance()->path($id);
 
-        return $this->createForDirectory($directory, $validate);
+        return $this->createForDirectory($directory);
     }
 
     public function writeComposerJson(Environment $environment, Project $project)

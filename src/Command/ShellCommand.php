@@ -2,8 +2,9 @@
 
 namespace Eznv\Command;
 
+use Eznv\EnvironmentManager;
 use Eznv\Process;
-use Eznv\Project;
+use Eznv\ProjectManager;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,10 +22,8 @@ final class ShellCommand
             return Command::FAILURE;
         }
 
-        $directory = getcwd();
-
-        $project = new Project($directory);
-        $environment = $project->environment();
+        $project = (new ProjectManager)->createForCwd();
+        $environment = (new EnvironmentManager)->createForProject($project);
 
         $shell = basename(Support::getEnv('SHELL') ?: 'bash');
         $relative = Support::makePathRelativeToHome($environment->path);

@@ -2,7 +2,8 @@
 
 namespace Eznv\Command;
 
-use Eznv\Project;
+use Eznv\EnvironmentManager;
+use Eznv\ProjectManager;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -15,25 +16,15 @@ final class DestroyCommand
 {
     public function __invoke(SymfonyStyle $io, #[Argument] string $directory = ''): int
     {
-        if ('' === $directory) {
-            $directory = getcwd();
-        }
-
-        $project = new Project($directory);
-        $environment = $project->environment();
+        $project = (new ProjectManager)->createForDirectory($directory);
+        $environment = (new EnvironmentManager)->createForProject($project);
 
         $relativeEnvironmentPath = Support::makePathRelativeToHome($environment->path);
-
-        if (! is_dir($environment->path)) {
-            $io->error("No directory exists at environment path {$relativeEnvironmentPath}");
-
-            return Command::FAILURE;
-        }
 
         // @todo prompt user to delete anyway.
         // @todo We are always creating environment directory in constructor so if directory didn't exist, it will have been created by this point and we will always error out here.
         if (! $environment->isInitialized()) {
-            $io->error("Directory exists at environment path {$relativeEnvironmentPath} but it does not appear to be a valid eznv environment");
+            $io->error("Environment directory does not exist or has not been fully initialized at path {$relativeEnvironmentPath}");
 
             return Command::FAILURE;
         }

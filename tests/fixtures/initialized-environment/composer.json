@@ -1,0 +1,9 @@
+{
+    "name": "eznv/initialized-environment",
+    "require": {},
+    "extra": {
+        "eznv": {
+            "project": "/some/random/path"
+        }
+    }
+}

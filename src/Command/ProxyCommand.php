@@ -2,8 +2,9 @@
 
 namespace Eznv\Command;
 
+use Eznv\EnvironmentManager;
 use Eznv\Process;
-use Eznv\Project;
+use Eznv\ProjectManager;
 use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -41,10 +42,8 @@ abstract class ProxyCommand extends Command
             return Command::FAILURE;
         }
 
-        $directory = getcwd();
-
-        $project = new Project($directory);
-        $environment = $project->environment();
+        $project = (new ProjectManager)->createForCwd();
+        $environment = (new EnvironmentManager)->createForProject($project);
 
         $process = (new Process($environment->path))
             ->create($this->getProxyCommand(), ...$input->getRawTokens(true))

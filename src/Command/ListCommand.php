@@ -2,7 +2,7 @@
 
 namespace Eznv\Command;
 
-use Eznv\Environment;
+use Eznv\EnvironmentManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 
@@ -13,7 +13,8 @@ final class ListCommand
 {
     public function __invoke(): int
     {
-        $baseDirectory = Environment::getBaseDirectory();
+        $baseDirectory = EnvironmentManager::getBaseDirectory();
+        $environmentManager = new EnvironmentManager();
         $files = scandir($baseDirectory);
         $environments = [];
 
@@ -26,7 +27,7 @@ final class ListCommand
                 continue;
             }
 
-            $environments[] = Environment::fromHash($file);
+            $environments[] = $environmentManager->createForProjectHash($file);
         }
 
         // @todo Not sure how I want to display this and what info to include yet.

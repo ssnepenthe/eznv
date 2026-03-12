@@ -9,6 +9,8 @@ use Eznv\Command\ListCommand;
 use Eznv\Command\ServeCommand;
 use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
+use Eznv\EnvironmentManager;
+use Eznv\Support;
 use Symfony\Component\Console\Application;
 
 $autoloader = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
@@ -19,6 +21,8 @@ if (! file_exists($autoloader)) {
 }
 
 require $autoloader;
+
+Support::ensureDirectoryExists(EnvironmentManager::getBaseDirectory());
 
 $application = new Application;
 $application->addCommands([

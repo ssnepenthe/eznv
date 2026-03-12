@@ -18,6 +18,11 @@
             "Eznv\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Eznv\\Tests\\": "tests/"
+        }
+    },
     "bin": [
         "bin/eznv"
     ]

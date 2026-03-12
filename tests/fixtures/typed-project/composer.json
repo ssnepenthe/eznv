@@ -1,0 +1,5 @@
+{
+    "name": "eznv/typed-project",
+    "type": "wordpress-plugin",
+    "require": {}
+}

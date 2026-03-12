@@ -2,14 +2,15 @@
 
 namespace Eznv\Command;
 
-use Eznv\EnvironmentManager;
+use Eznv\Environment;
+use Eznv\EnvironmentFinder;
 use Eznv\Process;
-use Eznv\ProjectManager;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
 // @todo is this redundant given our wp proxy command? I feel like the wp proxy command is just a nice-to-have whereas
@@ -17,10 +18,25 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 #[AsCommand(name: 'serve', description: 'Start a WordPress server for the current directory.')]
 final class ServeCommand
 {
-    public function __invoke(OutputInterface $output, #[Argument] string $directory = ''): int
+    public function __invoke(OutputInterface $output, SymfonyStyle $io, #[Argument] string $identifier = ''): int
     {
-        $project = (new ProjectManager)->createForDirectory($directory);
-        $environment = (new EnvironmentManager)->createForProject($project);
+        if ('' === $identifier) {
+            $identifier = getcwd();
+        }
+
+        if (false === $identifier) {
+            $io->error('Unable to determine project directory');
+
+            return Command::FAILURE;
+        }
+
+        $environment = (new EnvironmentFinder)->find($identifier);
+
+        if (! $environment instanceof Environment) {
+            $io->error("Unable to find environment {$identifier}");
+
+            return Command::FAILURE;
+        }
 
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 

@@ -8,21 +8,21 @@ use PHPUnit\Framework\TestCase;
 
 class EnvironmentManagerTest extends TestCase
 {
-    public function testCreateForDirectory()
+    public function testCreate()
     {
         $environmentManager = new EnvironmentManager();
 
         $path = __DIR__ . '/fixtures/environment';
-        $environment = $environmentManager->createForDirectory($path);
+        $environment = $environmentManager->create($path);
 
         $this->assertSame($path, $environment->path);
-        $this->assertNull($environment->projectPath);
+        $this->assertNull($environment->project);
 
         $path = __DIR__ . '/fixtures/initialized-environment';
-        $environment = $environmentManager->createForDirectory($path);
+        $environment = $environmentManager->create($path);
 
         $this->assertSame($path, $environment->path);
-        $this->assertSame('/some/random/path', $environment->projectPath);
+        $this->assertSame(__DIR__ . '/fixtures/project', $environment->project->path);
     }
 
     public function testCreateForProject()
@@ -35,18 +35,5 @@ class EnvironmentManagerTest extends TestCase
         // Environment path won't exist, therefore composer.json won't exists, so project path won't be set on environment...
         // Maybe we can revisit at some point with virtual file system in place?
         $this->assertStringEndsWith($project->hash, $environment->path);
-    }
-
-    public function testCreateForProjectId()
-    {
-        $environmentManager = new EnvironmentManager();
-        $projectPath = '/some/random/path';
-        $projectId = hash('sha256', $projectPath);
-
-        $environment = $environmentManager->createForProjectHash($projectId);
-
-        // Environment path won't exist, therefore composer.json won't exists, so project path won't be set on environment...
-        // Maybe we can revisit at some point with virtual file system in place?
-        $this->assertStringEndsWith($projectId, $environment->path);
     }
 }

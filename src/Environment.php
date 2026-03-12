@@ -5,7 +5,7 @@ namespace Eznv;
 // @todo We should ensure all paths are configurable.
 final class Environment
 {
-    public function __construct(public readonly string $path, public ?string $projectPath = null)
+    public function __construct(public readonly string $path, public ?Project $project = null)
     {}
 
     public function getComposerJsonPath(): string

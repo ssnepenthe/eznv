@@ -5,7 +5,6 @@ namespace Eznv\Command;
 use Closure;
 use Eznv\EnvironmentManager;
 use Eznv\Process;
-use Eznv\ProjectManager;
 use Eznv\Support;
 use Eznv\Template;
 use InvalidArgumentException;
@@ -28,11 +27,20 @@ final class InitCommand
     {
         $this->io = $io;
 
-        $projectManager = new ProjectManager();
-        $environmentManager = new EnvironmentManager();
+        if ('' === $directory) {
+            $directory = getcwd();
+        }
 
-        $project = $projectManager->createForDirectory($directory);
-        $environment = $environmentManager->createForProject($project);
+        if (false === $directory) {
+            $io->error('Unable to determine project directory');
+
+            return Command::FAILURE;
+        }
+
+        $manager = new EnvironmentManager;
+
+        $project = $manager->createProject($directory);
+        $environment = $manager->createForProject($project);
 
         $this->step(
             label: 'Preparing environment directories',
@@ -49,12 +57,12 @@ final class InitCommand
         // @todo server config (preferred port, etc) in extra
         $this->step(
             label: 'Writing composer.json file',
-            step: fn () => $environmentManager->writeComposerJson($environment, $project),
+            step: fn () => $manager->writeComposerJson($environment, $project),
             isSuccess: fn () => file_exists($environment->getComposerJsonPath()),
         );
         $this->step(
             label: 'Writing wp-cli.yml file',
-            step: fn () => $environmentManager->writeWpCliYml($environment),
+            step: fn () => $manager->writeWpCliYml($environment),
             isSuccess: fn () => file_exists($environment->getWpCliYmlPath()),
         );
 

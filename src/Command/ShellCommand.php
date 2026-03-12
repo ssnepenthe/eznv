@@ -2,10 +2,11 @@
 
 namespace Eznv\Command;
 
-use Eznv\EnvironmentManager;
+use Eznv\Environment;
+use Eznv\EnvironmentFinder;
 use Eznv\Process;
-use Eznv\ProjectManager;
 use Eznv\Support;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -14,7 +15,7 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 #[AsCommand(name: 'shell')]
 final class ShellCommand
 {
-    public function __invoke(SymfonyStyle $io): int
+    public function __invoke(SymfonyStyle $io, #[Argument] string $identifier = ''): int
     {
         if (! SymfonyProcess::isTtySupported()) {
             $io->error('TTY support is required');
@@ -22,8 +23,23 @@ final class ShellCommand
             return Command::FAILURE;
         }
 
-        $project = (new ProjectManager)->createForCwd();
-        $environment = (new EnvironmentManager)->createForProject($project);
+        if ('' === $identifier) {
+            $identifier = getcwd();
+        }
+
+        if (false === $identifier) {
+            $io->error('Unable to determine project directory');
+
+            return Command::FAILURE;
+        }
+
+        $environment = (new EnvironmentFinder)->find($identifier);
+
+        if (! $environment instanceof Environment) {
+            $io->error("Unable to find environment {$identifier}");
+
+            return Command::FAILURE;
+        }
 
         $shell = basename(Support::getEnv('SHELL') ?: 'bash');
         $relative = Support::makePathRelativeToHome($environment->path);

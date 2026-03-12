@@ -2,9 +2,9 @@
 
 namespace Eznv\Command;
 
-use Eznv\EnvironmentManager;
+use Eznv\Environment;
+use Eznv\EnvironmentFinder;
 use Eznv\Process;
-use Eznv\ProjectManager;
 use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
+// @todo would be nice to be able to pass an env identifier when calling proxy commands instead of only working in current dir.
 abstract class ProxyCommand extends Command
 {
     protected function initialize(InputInterface $input, OutputInterface $output): void
@@ -42,8 +43,21 @@ abstract class ProxyCommand extends Command
             return Command::FAILURE;
         }
 
-        $project = (new ProjectManager)->createForCwd();
-        $environment = (new EnvironmentManager)->createForProject($project);
+        $directory = getcwd();
+
+        if (false === $directory) {
+            $io->error('Unable to determine project directory');
+
+            return Command::FAILURE;
+        }
+
+        $environment = (new EnvironmentFinder)->findByProjectDirectory($directory);
+
+        if (! $environment instanceof Environment) {
+            $io->error("Unable to find environment {$directory}");
+
+            return Command::FAILURE;
+        }
 
         $process = (new Process($environment->path))
             ->create($this->getProxyCommand(), ...$input->getRawTokens(true))

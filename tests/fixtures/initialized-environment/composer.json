@@ -3,7 +3,7 @@
     "require": {},
     "extra": {
         "eznv": {
-            "project": "/some/random/path"
+            "project": "../project"
         }
     }
 }

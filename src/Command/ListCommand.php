@@ -2,7 +2,7 @@
 
 namespace Eznv\Command;
 
-use Eznv\EnvironmentManager;
+use Eznv\EnvironmentFinder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 
@@ -13,22 +13,7 @@ final class ListCommand
 {
     public function __invoke(): int
     {
-        $baseDirectory = EnvironmentManager::getBaseDirectory();
-        $environmentManager = new EnvironmentManager();
-        $files = scandir($baseDirectory);
-        $environments = [];
-
-        foreach ($files as $file) {
-            if ('.' === $file || '..' === $file) {
-                continue;
-            }
-
-            if (! is_dir("{$baseDirectory}/{$file}")) {
-                continue;
-            }
-
-            $environments[] = $environmentManager->createForProjectHash($file);
-        }
+        $environments = (new EnvironmentFinder)->findAll();
 
         // @todo Not sure how I want to display this and what info to include yet.
         dump($environments);

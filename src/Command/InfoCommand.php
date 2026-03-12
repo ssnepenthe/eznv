@@ -4,12 +4,14 @@ namespace Eznv\Command;
 
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
+use Eznv\Process;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(name: 'info', description: 'Display information about the current WordPress environment')]
 final class InfoCommand
@@ -42,16 +44,25 @@ final class InfoCommand
             return Command::FAILURE;
         }
 
-        // @todo option to show full path/short path?
+        $processFactory = new Process($environment->path);
+        $wpVersionProcess = $processFactory->create('wp', 'core', 'version')->mustRun();
+        $sqliteVersionProcess = $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version')->mustRun();
+
         $io->definitionList(
+            'Project',
+            ['Name' => $environment->project->name],
             ['Path' => Support::makePathRelativeToHome($environment->project->path)],
+            ['Type' => $environment->project->type],
             ['ID' => $environment->project->id],
             new TableSeparator(),
-            ['Environment' => Support::makePathRelativeToHome($environment->path)],
-            ['WordPress' => Support::makePathRelativeToHome($environment->getWordPressPath())],
-            ['Database' => Support::makePathRelativeToHome($environment->getDatabasePath())],
-            // @todo Should we get via WP-CLI instead? This could fall out of sync if updates applied via wp-admin or wp-cli.
-            ['WP Version' => $environment->getInstalledPackageVersion('roots/wordpress') ?: 'Not installed'],
+            'Environment',
+            ['Path' => Support::makePathRelativeToHome($environment->path)],
+            ['WordPress Path' => Path::makeRelative($environment->getWordPressPath(), $environment->path)],
+            ['WP Config Path' => Path::makeRelative($environment->getWpConfigPath(), $environment->path)],
+            ['DB Dropin Path' => Path::makeRelative($environment->getDatabaseDropinPath(), $environment->path)],
+            ['Database Path' => Path::makeRelative($environment->getDatabasePath(), $environment->path)],
+            ['WP Version' => trim($wpVersionProcess->getOutput())],
+            ['SQLite Integration Version' => trim($sqliteVersionProcess->getOutput())],
         );
 
         return Command::SUCCESS;

@@ -47,20 +47,6 @@ final class Environment
         return $this->getWordPressPath('wp-config.php');
     }
 
-    public function getInstalledPackageVersion(string $package): ?string
-    {
-        // @todo I think we need a minimum composer runtime version to get installed.php.
-        $installedPath = "{$this->path}/vendor/composer/installed.php";
-
-        if (! file_exists($installedPath)) {
-            return null;
-        }
-
-        $installed = require $installedPath;
-
-        return $installed['versions'][$package]['pretty_version'] ?? null;
-    }
-
     public function isInitialized(): bool
     {
         return is_dir($this->path) && file_exists($this->getComposerJsonPath());

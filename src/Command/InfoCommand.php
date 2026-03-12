@@ -4,6 +4,7 @@ namespace Eznv\Command;
 
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
+use Eznv\Eznv;
 use Eznv\Process;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
@@ -44,23 +45,28 @@ final class InfoCommand
             return Command::FAILURE;
         }
 
+        $dataDirectory = Eznv::instance()->baseDirectory;
+
         $processFactory = new Process($environment->path);
         $wpVersionProcess = $processFactory->create('wp', 'core', 'version')->mustRun();
         $sqliteVersionProcess = $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version')->mustRun();
 
         $io->definitionList(
+            'EZNV',
+            ['Data Directory' => Support::makePathRelativeToHome($dataDirectory)],
+            new TableSeparator(),
             'Project',
             ['Name' => $environment->project->name],
             ['Path' => Support::makePathRelativeToHome($environment->project->path)],
             ['Type' => $environment->project->type],
             ['ID' => $environment->project->id],
             new TableSeparator(),
-            'Environment',
-            ['Path' => Support::makePathRelativeToHome($environment->path)],
-            ['WordPress Path' => Path::makeRelative($environment->getWordPressPath(), $environment->path)],
-            ['WP Config Path' => Path::makeRelative($environment->getWpConfigPath(), $environment->path)],
-            ['DB Dropin Path' => Path::makeRelative($environment->getDatabaseDropinPath(), $environment->path)],
-            ['Database Path' => Path::makeRelative($environment->getDatabasePath(), $environment->path)],
+            'Environment (paths relative to eznv data directory)',
+            ['Base Path' => Path::makeRelative($environment->path, $dataDirectory)],
+            ['WordPress Path' => Path::makeRelative($environment->getWordPressPath(), $dataDirectory)],
+            ['WP Config Path' => Path::makeRelative($environment->getWpConfigPath(), $dataDirectory)],
+            ['DB Dropin Path' => Path::makeRelative($environment->getDatabaseDropinPath(), $dataDirectory)],
+            ['Database Path' => Path::makeRelative($environment->getDatabasePath(), $dataDirectory)],
             ['WP Version' => trim($wpVersionProcess->getOutput())],
             ['SQLite Integration Version' => trim($sqliteVersionProcess->getOutput())],
         );

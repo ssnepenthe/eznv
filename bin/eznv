@@ -6,6 +6,7 @@ use Eznv\Command\DestroyCommand;
 use Eznv\Command\InfoCommand;
 use Eznv\Command\InitCommand;
 use Eznv\Command\ListCommand;
+use Eznv\Command\LogsCommand;
 use Eznv\Command\ServeCommand;
 use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
@@ -31,6 +32,7 @@ $application->addCommands([
     new InfoCommand,
     new InitCommand,
     new ListCommand,
+    new LogsCommand,
     new ServeCommand,
     new ShellCommand,
     new WpCommand,

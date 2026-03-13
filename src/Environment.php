@@ -23,6 +23,11 @@ final class Environment
         return $this->getWordPressPath('wp-content/database/.ht.sqlite');
     }
 
+    public function getDebugLogPath(): string
+    {
+        return $this->getWordPressPath('wp-content/debug.log');
+    }
+
     public function getPath(string ...$pathParts): string
     {
         $pathParts = array_map(fn ($part) => trim($part, '/\\'), array_filter($pathParts));

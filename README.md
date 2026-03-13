@@ -52,6 +52,12 @@ Optionally set the number of server workers:
 PHP_CLI_SERVER_WORKERS=4 eznv serve
 ```
 
+Tail debug.log:
+
+```
+eznv logs
+```
+
 You can use eznv to run composer commands within your environment:
 
 ```

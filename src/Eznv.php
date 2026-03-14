@@ -3,6 +3,7 @@
 namespace Eznv;
 
 use RuntimeException;
+use Symfony\Component\Filesystem\Path;
 
 final class Eznv
 {
@@ -30,10 +31,7 @@ final class Eznv
 
     public function path(string ...$pathParts): string
     {
-        $pathParts = array_map(fn ($part) => trim($part, '/\\'), array_filter($pathParts));
-        $path = implode('/', $pathParts);
-
-        return "{$this->baseDirectory}/{$path}";
+        return Path::join($this->baseDirectory, ...$pathParts);
     }
 
     public static function instance()

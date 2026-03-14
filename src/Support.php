@@ -4,7 +4,7 @@ namespace Eznv;
 
 use RuntimeException;
 use Symfony\Component\Console\Completion\CompletionInput;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 
 final class Support
 {
@@ -47,7 +47,7 @@ final class Support
             return $path;
         }
 
-        $relative = (new Filesystem)->makePathRelative($path, $home);
+        $relative = Path::makeRelative($path, $home);
 
         if ($relative === $path) {
             return $path;

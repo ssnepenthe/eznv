@@ -2,6 +2,8 @@
 
 namespace Eznv;
 
+use Symfony\Component\Filesystem\Path;
+
 // @todo We should ensure all paths are configurable.
 final class Environment
 {
@@ -30,11 +32,7 @@ final class Environment
 
     public function getPath(string ...$pathParts): string
     {
-        $pathParts = array_map(fn ($part) => trim($part, '/\\'), array_filter($pathParts));
-        $path = implode('/', $pathParts);
-
-        // @todo trim $this->path?
-        return "{$this->path}/{$path}";
+        return Path::join($this->path, ...$pathParts);
     }
 
     public function getWordPressPath(string $path = ''): string

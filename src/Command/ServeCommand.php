@@ -8,6 +8,7 @@ use Eznv\ProcessFactory;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,7 +23,9 @@ final class ServeCommand
     public function __invoke(
         OutputInterface $output,
         SymfonyStyle $io,
-        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
+        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = '',
+        #[Option] string $host = 'localhost',
+        #[Option] int $port = 8080
     ): int {
         if ('' === $identifier) {
             $identifier = getcwd();
@@ -44,11 +47,10 @@ final class ServeCommand
 
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 
-        // @todo configurable port at minimum.
         // @todo what if we sent to background and redirected all output to log file?
         // @todo set PHP_CLI_SERVER_WORKERS env var by default? Or at least recommend user to set it.
         (new ProcessFactory($environment->path))
-            ->create('wp', 'server')
+            ->create('wp', 'server', "--host={$host}", "--port={$port}")
             ->setTty(Process::isTtySupported()) // @todo Don't remember why we set TTY mode, but don't think we need it.
             ->setTimeout(null)
             ->run(function ($type, $buffer) use ($errorOutput, $output): void {

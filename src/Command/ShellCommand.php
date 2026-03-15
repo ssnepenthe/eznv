@@ -6,7 +6,6 @@ use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
 use Eznv\Support;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -15,19 +14,15 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'shell')]
 final class ShellCommand
 {
-    public function __invoke(
-        SymfonyStyle $io,
-        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
-    ): int {
+    public function __invoke(SymfonyStyle $io): int
+    {
         if (! Process::isTtySupported()) {
             $io->error('TTY support is required');
 
             return Command::FAILURE;
         }
 
-        if ('' === $identifier) {
-            $identifier = getcwd();
-        }
+        $identifier = getcwd();
 
         if (false === $identifier) {
             $io->error('Unable to determine project directory');

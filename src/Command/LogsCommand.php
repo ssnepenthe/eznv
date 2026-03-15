@@ -5,8 +5,6 @@ namespace Eznv\Command;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
-use Eznv\Support;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -17,14 +15,9 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'logs', description: 'Tail the debug.log for the current environment')]
 final class LogsCommand
 {
-    public function __invoke(
-        OutputInterface $output,
-        SymfonyStyle $io,
-        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
-    ): int {
-        if ('' === $identifier) {
-            $identifier = getcwd();
-        }
+    public function __invoke(OutputInterface $output, SymfonyStyle $io): int
+    {
+        $identifier = getcwd();
 
         if (false === $identifier) {
             $io->error('Unable to determine project directory');

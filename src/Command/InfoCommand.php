@@ -7,7 +7,6 @@ use Eznv\EnvironmentFinder;
 use Eznv\Eznv;
 use Eznv\ProcessFactory;
 use Eznv\Support;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
@@ -17,13 +16,9 @@ use Symfony\Component\Filesystem\Path;
 #[AsCommand(name: 'info', description: 'Display information about the current WordPress environment')]
 final class InfoCommand
 {
-    public function __invoke(
-        SymfonyStyle $io,
-        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = ''
-    ): int {
-        if ('' === $identifier) {
-            $identifier = getcwd();
-        }
+    public function __invoke(SymfonyStyle $io): int
+    {
+        $identifier = getcwd();
 
         if (false === $identifier) {
             $io->error('Unable to determine project directory');

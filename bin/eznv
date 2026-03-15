@@ -3,6 +3,7 @@
 
 use Eznv\Command\ComposerCommand;
 use Eznv\Command\DestroyCommand;
+use Eznv\Command\ForCommand;
 use Eznv\Command\InfoCommand;
 use Eznv\Command\InitCommand;
 use Eznv\Command\ListCommand;
@@ -29,6 +30,7 @@ $application = new Application;
 $application->addCommands([
     new ComposerCommand,
     new DestroyCommand,
+    new ForCommand,
     new InfoCommand,
     new InitCommand,
     new ListCommand,

@@ -5,8 +5,6 @@ namespace Eznv\Command;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
-use Eznv\Support;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -23,13 +21,10 @@ final class ServeCommand
     public function __invoke(
         OutputInterface $output,
         SymfonyStyle $io,
-        #[Argument(suggestedValues: [Support::class, 'suggestEnvironmentIdentifiers'])] string $identifier = '',
         #[Option] string $host = 'localhost',
         #[Option] int $port = 8080
     ): int {
-        if ('' === $identifier) {
-            $identifier = getcwd();
-        }
+        $identifier = getcwd();
 
         if (false === $identifier) {
             $io->error('Unable to determine project directory');

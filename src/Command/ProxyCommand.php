@@ -15,7 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
 
-// @todo would be nice to be able to pass an env identifier when calling proxy commands instead of only working in current dir.
 abstract class ProxyCommand extends Command
 {
     protected function initialize(InputInterface $input, OutputInterface $output): void

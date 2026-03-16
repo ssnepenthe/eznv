@@ -46,7 +46,7 @@ final class LogsCommand
         $process->run();
 
         if (0 !== $process->getExitCode()) {
-            $io->error('The WP_DEBUG_LOG constant is not defined - run "wp config set WP_DEBUG_LOG true --raw" and try again');
+            $io->error('The WP_DEBUG_LOG constant is not defined - run "eznv wp config set WP_DEBUG_LOG true --raw" and try again');
 
             return Command::FAILURE;
         }
@@ -54,7 +54,7 @@ final class LogsCommand
         $debugLogEnabled = trim($processFactory->create('wp', 'config', 'get', 'WP_DEBUG_LOG', '--format=json')->mustRun()->getOutput());
 
         if ('true' !== $debugLogEnabled) {
-            $io->error('The WP_DEBUG_LOG constant must be set to true - run "wp config set WP_DEBUG_LOG true --raw" and try again');
+            $io->error('The WP_DEBUG_LOG constant must be set to true - run "eznv wp config set WP_DEBUG_LOG true --raw" and try again');
 
             return Command::FAILURE;
         }

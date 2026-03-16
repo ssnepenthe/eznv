@@ -15,13 +15,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand('for')]
+#[AsCommand(name: 'for', description: 'Allows running commands in a specific project directory')]
 class ForCommand extends Command
 {
     public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void
     {
-        if ($input->mustSuggestArgumentValuesFor('environment')) {
-            $suggestions->suggestValues($this->suggestEnvironments($input));
+        if ($input->mustSuggestArgumentValuesFor('project')) {
+            $suggestions->suggestValues($this->suggestProjects($input));
 
             return;
         }
@@ -47,9 +47,9 @@ class ForCommand extends Command
     {
         $this->ignoreValidationErrors();
 
-        $this->addArgument('environment', InputArgument::REQUIRED)
-            ->addArgument('command-name', InputArgument::REQUIRED)
-            ->addArgument('args', InputArgument::IS_ARRAY | InputArgument::OPTIONAL);
+        $this->addArgument('project', InputArgument::REQUIRED, 'An identifier for the project connected to the environment you want to run the command in (can be name, id, or path)')
+            ->addArgument('command-name', InputArgument::REQUIRED, 'The eznv command you want to run')
+            ->addArgument('args', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Arguments to be passed along to the command');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -59,7 +59,7 @@ class ForCommand extends Command
         }
 
         $io = new SymfonyStyle($input, $output);
-        $identifier = $input->getArgument('environment');
+        $identifier = $input->getArgument('project');
         $environment = (new EnvironmentFinder)->find($identifier);
 
         if (! $environment instanceof Environment) {
@@ -84,7 +84,7 @@ class ForCommand extends Command
 
         $newInput = new ArgvInput(['eznv', ...$this->removeFirstOccurrences(
             $input->getRawTokens(),
-            [$this->getName(), $input->getArgument('environment')]
+            [$this->getName(), $input->getArgument('project')]
         )]);
 
         return $this->getApplication()->run($newInput, $output);
@@ -98,7 +98,7 @@ class ForCommand extends Command
             throw new RuntimeException();
         }
 
-        $tokens = $this->removeFirstOccurrences($tokens, [$this->getName(), $input->getArgument('environment'), '|']);
+        $tokens = $this->removeFirstOccurrences($tokens, [$this->getName(), $input->getArgument('project'), '|']);
 
         return CompletionInput::fromTokens($tokens, 2);
     }
@@ -129,7 +129,7 @@ class ForCommand extends Command
         );
     }
 
-    private function suggestEnvironments(CompletionInput $input): array
+    private function suggestProjects(CompletionInput $input): array
     {
         $currentValue = $input->getCompletionValue();
         $suggestions = [];

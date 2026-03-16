@@ -46,10 +46,16 @@ Run the WP-CLI server:
 eznv serve
 ```
 
-Optionally set the number of server workers:
+You may wish to increase the number of server workers:
 
 ```
 PHP_CLI_SERVER_WORKERS=4 eznv serve
+```
+
+Or modify the host and port that the site is served on:
+
+```
+eznv serve --host=wordpress.local --port=8000
 ```
 
 Tail debug.log:

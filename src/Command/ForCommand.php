@@ -90,7 +90,7 @@ class ForCommand extends Command
         return $this->getApplication()->run($newInput, $output);
     }
 
-    private function createSubcommandInput(InputInterface $input): CompletionInput
+    private function createSubcommandInput(CompletionInput $input): CompletionInput
     {
         $tokens = preg_split('{\s+}', $input->__toString());
 

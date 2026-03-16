@@ -40,6 +40,12 @@ final class ServeCommand
             return Command::FAILURE;
         }
 
+        if (! $environment->isInitialized()) {
+            $io->error("Environment {$identifier} has not been initialized");
+
+            return Command::FAILURE;
+        }
+
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 
         // @todo what if we sent to background and redirected all output to log file?

@@ -68,7 +68,7 @@ final class EnvironmentManager
         return new Project($directory, $composerJson['name'], $composerJson['type'] ?? 'library');
     }
 
-    public function writeComposerJson(Environment $environment, Project $project)
+    public function writeComposerJson(Environment $environment)
     {
         $require = [
             'ext-pdo' => '*',
@@ -76,15 +76,15 @@ final class EnvironmentManager
             'psy/psysh' => '*',
             'roots/wordpress' => '*',
             'wpackagist-plugin/sqlite-database-integration' => '*',
-            $project->name => '*',
+            $environment->project->name => '*',
         ];
 
-        if ('wordpress-theme' !== ($project->type ?? 'library')) {
+        if ('wordpress-theme' !== ($environment->project->type ?? 'library')) {
             $require['wpackagist-theme/twentytwentyfive'] = '*';
         }
 
         $composerJson = [
-            'name' => "eznv/{$project->id}",
+            'name' => "eznv/{$environment->project->id}",
             'version' => '1.0.0',
             'license' => 'MIT',
             'require' => $require,
@@ -96,7 +96,7 @@ final class EnvironmentManager
                 ],
                 [
                     'type' => 'path',
-                    'url' => $project->path,
+                    'url' => $environment->project->path,
                 ],
             ],
             'config' => [
@@ -107,7 +107,7 @@ final class EnvironmentManager
             ],
             'extra' => [
                 'eznv' => [
-                    'project' => $project->path,
+                    'project' => $environment->project->path,
                 ],
                 'installer-paths' => [
                     'wordpress/wp-content/mu-plugins/{$name}/' => ['type:wordpress-muplugin'],

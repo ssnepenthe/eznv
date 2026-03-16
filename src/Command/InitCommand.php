@@ -57,7 +57,7 @@ final class InitCommand
         // @todo server config (preferred port, etc) in extra
         $this->step(
             label: 'Writing composer.json file',
-            step: fn () => $manager->writeComposerJson($environment, $project),
+            step: fn () => $manager->writeComposerJson($environment),
             isSuccess: fn () => file_exists($environment->getComposerJsonPath()),
         );
         $this->step(

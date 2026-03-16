@@ -86,7 +86,15 @@ if ( ! defined( 'WP_DEBUG_LOG' ) ) {
 
 /** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', __DIR__ . '/' );
+	define( 'ABSPATH', __DIR__ . '/wordpress/' );
+}
+
+if ( ! defined( 'WP_CONTENT_DIR' ) ) {
+	define( 'WP_CONTENT_DIR', __DIR__ . '/wp-content' );
+}
+
+if ( ! defined( 'WP_CONTENT_URL' ) ) {
+	define( 'WP_CONTENT_URL', 'http://localhost:8080/wp-content' );
 }
 
 /** Sets up WordPress vars and included files. */

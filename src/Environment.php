@@ -15,19 +15,24 @@ final class Environment
         return $this->getPath('composer.json');
     }
 
+    public function getContentPath(string ...$pathParts): string
+    {
+        return $this->getPublicPath('wp-content', ...$pathParts);
+    }
+
     public function getDatabaseDropinPath(): string
     {
-        return $this->getWordPressPath('wp-content/db.php');
+        return $this->getContentPath('db.php');
     }
 
     public function getDatabasePath(): string
     {
-        return $this->getWordPressPath('wp-content/database/.ht.sqlite');
+        return $this->getContentPath('database', '.ht.sqlite');
     }
 
     public function getDebugLogPath(): string
     {
-        return $this->getWordPressPath('wp-content/debug.log');
+        return $this->getContentPath('debug.log');
     }
 
     public function getPath(string ...$pathParts): string
@@ -35,9 +40,14 @@ final class Environment
         return Path::join($this->path, ...$pathParts);
     }
 
-    public function getWordPressPath(string $path = ''): string
+    public function getPublicPath(string ...$pathParts): string
     {
-        return $this->getPath('wordpress', $path);
+        return $this->getPath('public', ...$pathParts);
+    }
+
+    public function getWordPressPath(string ...$pathParts): string
+    {
+        return $this->getPublicPath('wordpress', ...$pathParts);
     }
 
     public function getWpCliYmlPath(): string
@@ -47,7 +57,7 @@ final class Environment
 
     public function getWpConfigPath(): string
     {
-        return $this->getWordPressPath('wp-config.php');
+        return $this->getPublicPath('wp-config.php');
     }
 
     public function isInitialized(): bool

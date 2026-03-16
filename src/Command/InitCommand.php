@@ -15,6 +15,7 @@ use Symfony\Component\Console\Helper\DebugFormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'init', description: 'Initialize a WordPress environment for the current directory')]
@@ -43,8 +44,11 @@ final class InitCommand
         $environment = $manager->createForProject($project);
 
         $this->step(
-            label: 'Preparing environment directories',
-            step: fn () => Support::ensureDirectoryExists($environment->path),
+            label: 'Copying site base files',
+            step: function () use ($environment) {
+                Support::ensureDirectoryExists($environment->path);
+                (new Filesystem)->mirror(__DIR__ . '/../../site', $environment->path);
+            },
         );
 
         // @todo Prompt user to overwrite existing environment.
@@ -60,11 +64,6 @@ final class InitCommand
             step: fn () => $manager->writeComposerJson($environment),
             isSuccess: fn () => file_exists($environment->getComposerJsonPath()),
         );
-        $this->step(
-            label: 'Writing wp-cli.yml file',
-            step: fn () => $manager->writeWpCliYml($environment),
-            isSuccess: fn () => file_exists($environment->getWpCliYmlPath()),
-        );
 
         // @todo error handling after running processes?
         $processFactory = new ProcessFactory($environment->path);
@@ -72,17 +71,6 @@ final class InitCommand
         $this->step(
             label: 'Installing environment dependencies',
             process: $processFactory->create('composer', 'install', '--no-interaction', '--no-progress'),
-        );
-
-        $this->step(
-            label: 'Creating wp-config.php',
-            step: function () use ($environment) {
-                // @todo we can pretty safely assume this file doesnt exist already, but even if it did we probably want to overwrite it.
-                if (! file_exists($environment->getWpConfigPath())) {
-                    Template::write(__DIR__ . '/../../stubs/wp-config.stub', $environment->getWpConfigPath());
-                }
-            },
-            isSuccess: fn () => file_exists($environment->getWpConfigPath()),
         );
 
         $this->step(
@@ -97,10 +85,10 @@ final class InitCommand
                 // @todo move this to composer post-install/post-update script?
                 if (! file_exists($environment->getDatabaseDropinPath())) {
                     Template::write(
-                        "{$environment->path}/wordpress/wp-content/plugins/sqlite-database-integration/db.copy",
+                        $environment->getContentPath('plugins', 'sqlite-database-integration', 'db.copy'),
                         $environment->getDatabaseDropinPath(),
                         [
-                            'SQLITE_IMPLEMENTATION_FOLDER_PATH' => "{$environment->path}/wordpress/wp-content/plugins/sqlite-database-integration",
+                            'SQLITE_IMPLEMENTATION_FOLDER_PATH' => $environment->getContentPath('plugins', 'sqlite-database-integration'),
                             'SQLITE_PLUGIN' => 'sqlite-database-integration/load.php',
                         ]
                     );
@@ -111,6 +99,7 @@ final class InitCommand
 
         // @todo allow user to override all options?
         // @todo we also need better port handling - what if a user wants to run multiple environments at once? looks like --url will map to "siteurl" and "home" options
+        // @todo Probably a bit more ideal to set home and siteurl in wp-config.php.
         $this->step(
             label: 'Running WordPress installer',
             process: $processFactory->create(
@@ -124,6 +113,11 @@ final class InitCommand
                 '--admin_email=admin@example.com',
                 '--skip-email'
             ),
+        );
+
+        $this->step(
+            label: 'Setting Site URL',
+            process: $processFactory->create('wp', 'option', 'update', 'siteurl', 'http://localhost:8080/wordpress'),
         );
 
         $this->step(

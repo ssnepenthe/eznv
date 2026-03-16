@@ -76,12 +76,12 @@ final class EnvironmentManager
             'ext-pdo_sqlite' => '*',
             'psy/psysh' => '*',
             'roots/wordpress' => '*',
-            'wpackagist-plugin/sqlite-database-integration' => '*',
+            'wp-plugin/sqlite-database-integration' => '*',
             $environment->project->name => '*',
         ];
 
         if ('wordpress-theme' !== ($environment->project->type ?? 'library')) {
-            $require['wpackagist-theme/twentytwentyfive'] = '*';
+            $require['wp-theme/twentytwentyfive'] = '*';
         }
 
         $composerJson = [
@@ -91,9 +91,13 @@ final class EnvironmentManager
             'require' => $require,
             'repositories' => [
                 [
-                    'name' => 'wpackagist',
+                    'name' => 'wp-composer',
                     'type' => 'composer',
-                    'url' => 'https://wpackagist.org',
+                    'url' => 'https://repo.wp-composer.com',
+                    'only' => [
+                        'wp-plugin/*',
+                        'wp-theme/*',
+                    ],
                 ],
                 [
                     'type' => 'path',
@@ -111,10 +115,11 @@ final class EnvironmentManager
                     'project' => $environment->project->path,
                 ],
                 'installer-paths' => [
-                    'wordpress/wp-content/mu-plugins/{$name}/' => ['type:wordpress-muplugin'],
-                    'wordpress/wp-content/plugins/{$name}/' => ['type:wordpress-plugin'],
-                    'wordpress/wp-content/themes/{$name}' => ['type:wordpress-theme'],
+                    'public/wp-content/mu-plugins/{$name}/' => ['type:wordpress-muplugin'],
+                    'public/wp-content/plugins/{$name}/' => ['type:wordpress-plugin'],
+                    'public/wp-content/themes/{$name}' => ['type:wordpress-theme'],
                 ],
+                'wordpress-install-dir' => 'public/wordpress',
             ],
             'minimum-stability' => 'dev',
             'prefer-stable' => true,
@@ -124,10 +129,5 @@ final class EnvironmentManager
             $environment->getComposerJsonPath(),
             json_encode($composerJson, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
         );
-    }
-
-    public function writeWpCliYml(Environment $environment)
-    {
-        (new Filesystem)->dumpFile($environment->getWpCliYmlPath(), "path: wordpress\n");
     }
 }

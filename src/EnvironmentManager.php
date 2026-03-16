@@ -3,6 +3,7 @@
 namespace Eznv;
 
 use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
 // @todo Better name?
@@ -119,22 +120,14 @@ final class EnvironmentManager
             'prefer-stable' => true,
         ];
 
-        $written = file_put_contents(
+        (new Filesystem)->dumpFile(
             $environment->getComposerJsonPath(),
             json_encode($composerJson, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
         );
-
-        if (false === $written) {
-            throw new RuntimeException("Failed to write composer.json in {$environment->path}");
-        }
     }
 
     public function writeWpCliYml(Environment $environment)
     {
-        $written = file_put_contents($environment->getWpCliYmlPath(), "path: wordpress\n");
-
-        if (false === $written) {
-            throw new RuntimeException("Failed to write wp-cli.yml in {$environment->path}");
-        }
+        (new Filesystem)->dumpFile($environment->getWpCliYmlPath(), "path: wordpress\n");
     }
 }

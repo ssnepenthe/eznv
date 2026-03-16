@@ -3,7 +3,7 @@
 namespace Eznv;
 
 use RuntimeException;
-use Symfony\Component\Console\Completion\CompletionInput;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
 final class Support
@@ -62,12 +62,7 @@ final class Support
             throw new RuntimeException();
         }
 
-        $contents = file_get_contents($path);
-
-        if (false === $contents) {
-            throw new RuntimeException("Failed to read file at {$path}");
-        }
-
+        $contents = (new Filesystem)->readFile($path);
         $decoded = json_decode($contents, true, flags: JSON_THROW_ON_ERROR);
 
         return $decoded;

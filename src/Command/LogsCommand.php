@@ -42,7 +42,8 @@ final class LogsCommand
         $processFactory = new ProcessFactory($environment->path);
 
         // @todo Maybe we should just run wp eval instead to handle this in a single operation?
-        $process = $processFactory->create('wp', 'config', 'has', 'WP_DEBUG_LOG')->mustRun();
+        $process = $processFactory->create('wp', 'config', 'has', 'WP_DEBUG_LOG');
+        $process->run();
 
         if (0 !== $process->getExitCode()) {
             $io->error('The WP_DEBUG_LOG constant is not defined - run "wp config set WP_DEBUG_LOG true --raw" and try again');

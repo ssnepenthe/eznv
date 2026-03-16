@@ -82,8 +82,32 @@ You can start an interactive login shell at your environment root:
 eznv shell
 ```
 
-And lastly you can destroy the environment:
+And you can destroy the environment:
 
 ```
 eznv destroy
+```
+
+You can also use the `for` command to run any command in a specified project directory. It utilizes your package name as defined in composer.json:
+
+```
+eznv for ssnepenthe/eznv serve
+```
+
+But can also be used with a package id:
+
+```
+eznv for 4be5d8a926c9 info
+```
+
+Or package directory:
+
+```
+eznv for /path/to/eznv shell
+```
+
+You can list all valid identifiers for all initialized environments:
+
+```
+eznv env-list
 ```

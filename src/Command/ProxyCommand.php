@@ -61,7 +61,8 @@ abstract class ProxyCommand extends Command
         $process = (new ProcessFactory($environment->path))
             ->create($this->getProxyCommand(), ...$input->getRawTokens(true))
             // @todo notify user if not supported they can't use interactive commands?
-            ->setTty(Process::isTtySupported());
+            ->setTty(Process::isTtySupported())
+            ->setTimeout($this->getProcessTimeout());
 
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 
@@ -74,6 +75,11 @@ abstract class ProxyCommand extends Command
         });
 
         return $process->getExitCode() ?? Command::SUCCESS;
+    }
+
+    protected function getProcessTimeout(): int
+    {
+        return 60;
     }
 
     abstract protected function getProxyCommand(): string;

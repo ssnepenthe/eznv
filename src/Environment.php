@@ -30,11 +30,6 @@ final class Environment
         return $this->getContentPath('database', '.ht.sqlite');
     }
 
-    public function getDebugLogPath(): string
-    {
-        return $this->getContentPath('debug.log');
-    }
-
     public function getPath(string ...$pathParts): string
     {
         return Path::join($this->path, ...$pathParts);

@@ -46,15 +46,23 @@ final class LogsCommand
         $process->run();
 
         if (0 !== $process->getExitCode()) {
-            $io->error('The WP_DEBUG_LOG constant is not defined - run "eznv wp config set WP_DEBUG_LOG true --raw" and try again');
+            $io->error('The WP_DEBUG_LOG constant is not defined - update wp-config.php and try again');
 
             return Command::FAILURE;
         }
 
-        $debugLogEnabled = trim($processFactory->create('wp', 'config', 'get', 'WP_DEBUG_LOG', '--format=json')->mustRun()->getOutput());
+        $debugLog = json_decode(
+            trim($processFactory->create('wp', 'config', 'get', 'WP_DEBUG_LOG', '--format=json')->mustRun()->getOutput()),
+            JSON_THROW_ON_ERROR
+        );
 
-        if ('true' !== $debugLogEnabled) {
-            $io->error('The WP_DEBUG_LOG constant must be set to true - run "eznv wp config set WP_DEBUG_LOG true --raw" and try again');
+        // @ref wp_debug_mode()
+        if (in_array(strtolower((string) $debugLog), ['true', '1'], true)) {
+            $debugLog = $processFactory->create('wp', 'eval', 'echo WP_CONTENT_DIR . "/debug.log";')->mustRun()->getOutput();
+        }
+
+        if (! is_string($debugLog)) {
+            $io->error('The WP_DEBUG_LOG constant must be true or a path to the debug.log file - update wp-config.php and try again');
 
             return Command::FAILURE;
         }
@@ -62,7 +70,7 @@ final class LogsCommand
         $errorOutput = $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
 
         $processFactory
-            ->create('tail', '-F', $environment->getDebugLogPath())
+            ->create('tail', '-F', $debugLog)
             ->setTimeout(null)
             ->run(function ($type, $buffer) use ($errorOutput, $output): void {
                 if (Process::ERR === $type) {

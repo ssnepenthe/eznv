@@ -6,7 +6,6 @@ use Closure;
 use Eznv\EnvironmentManager;
 use Eznv\ProcessFactory;
 use Eznv\Support;
-use Eznv\Template;
 use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -15,7 +14,6 @@ use Symfony\Component\Console\Helper\DebugFormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'init', description: 'Initialize a WordPress environment for the current directory')]
@@ -43,30 +41,69 @@ final class InitCommand
         $project = $manager->createProject($directory);
         $environment = $manager->createForProject($project);
 
-        $this->step(
-            label: 'Copying site base files',
-            step: function () use ($environment) {
-                Support::ensureDirectoryExists($environment->path);
-                (new Filesystem)->mirror(__DIR__ . '/../../site', $environment->path);
-            },
-        );
-
         // @todo Prompt user to overwrite existing environment.
-        if ($environment->isInitialized()) {
-            $io->error('An environment has already been initialized for this directory.');
+        if (file_exists($environment->path)) {
+            $io->error("A file already exists at environment path {$environment->path}");
 
             return Command::FAILURE;
         }
 
-        // @todo server config (preferred port, etc) in extra
         $this->step(
-            label: 'Writing composer.json file',
-            step: fn () => $manager->writeComposerJson($environment),
-            isSuccess: fn () => file_exists($environment->getComposerJsonPath()),
+            label: 'Creating environment directory',
+            step: function () use ($environment) {
+                Support::ensureDirectoryExists($environment->path);
+            },
         );
 
         // @todo error handling after running processes?
         $processFactory = new ProcessFactory($environment->path);
+
+        // @todo Remove stability, repository if/when wp-sqlite-starter is published to packagist
+        $this->step(
+            label: 'Initializing project',
+            process: $processFactory->create(
+                'composer',
+                'create-project',
+                'ssnepenthe/wp-sqlite-starter',
+                $environment->path,
+                '--stability=dev',
+                '--prefer-dist',
+                '--repository={"type": "vcs", "url": "https://github.com/ssnepenthe/wp-sqlite-starter.git"}',
+                '--no-scripts',
+                '--no-progress',
+                '--remove-vcs',
+                '--no-install',
+                '--no-interaction'
+            ),
+        );
+
+        // @todo would it be better to handle all of this by running actual composer commands? If nothing else, probably slower...
+        $this->step(
+            label: 'Updating composer.json',
+            step: function () use ($environment) {
+                $composerJson = Support::readJsonFile($environment->getComposerJsonPath());
+
+                $composerJson['name'] = "eznv/{$environment->project->id}";
+                $composerJson['require'][$environment->project->name] = '*';
+
+                if ('theme' === $environment->project->type) {
+                    unset($composerJson['require']['wp-theme/twentytwentyfive']);
+                }
+
+                $composerJson['repositories'][] = [
+                    'name' => $environment->project->name,
+                    'type' => 'path',
+                    'url' => $environment->project->path,
+                ];
+                $composerJson['extra']['eznv'] = [
+                    'project' => $environment->project->path,
+                ];
+
+                Support::writeJsonToFile($composerJson, $environment->getComposerJsonPath());
+            },
+            // @todo gross? maybe just compare mtime before and after step?
+            isSuccess: fn () => Support::readJsonFile($environment->getComposerJsonPath())['name'] === "eznv/{$environment->project->id}",
+        );
 
         $this->step(
             label: 'Installing environment dependencies',
@@ -79,27 +116,12 @@ final class InitCommand
         );
 
         $this->step(
-            label: 'Setting up db.php dropin',
-            step: function () use ($environment) {
-                // @todo we can pretty much guarantee this file doesnt already exist but even if it did we probably want to overwrite it
-                // @todo move this to composer post-install/post-update script?
-                if (! file_exists($environment->getDatabaseDropinPath())) {
-                    Template::write(
-                        $environment->getContentPath('plugins', 'sqlite-database-integration', 'db.copy'),
-                        $environment->getDatabaseDropinPath(),
-                        [
-                            'SQLITE_IMPLEMENTATION_FOLDER_PATH' => $environment->getContentPath('plugins', 'sqlite-database-integration'),
-                            'SQLITE_PLUGIN' => 'sqlite-database-integration/load.php',
-                        ]
-                    );
-                }
-            },
-            isSuccess: fn () => file_exists($environment->getDatabaseDropinPath()),
+            label: 'Enabling WP_DEBUG',
+            process: $processFactory->create('wp', 'config', 'set', 'WP_DEBUG', 'true', '--raw'),
         );
 
         // @todo allow user to override all options?
-        // @todo we also need better port handling - what if a user wants to run multiple environments at once? looks like --url will map to "siteurl" and "home" options
-        // @todo Probably a bit more ideal to set home and siteurl in wp-config.php.
+        // @todo we also need better host and port handling - what if a user wants to run multiple environments at once?
         $this->step(
             label: 'Running WordPress installer',
             process: $processFactory->create(
@@ -113,11 +135,6 @@ final class InitCommand
                 '--admin_email=admin@example.com',
                 '--skip-email'
             ),
-        );
-
-        $this->step(
-            label: 'Setting Site URL',
-            process: $processFactory->create('wp', 'option', 'update', 'siteurl', 'http://localhost:8080/wordpress'),
         );
 
         $this->step(

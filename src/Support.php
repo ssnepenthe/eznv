@@ -67,4 +67,12 @@ final class Support
 
         return $decoded;
     }
+
+    public static function writeJsonToFile(array $json, string $path): void
+    {
+        (new Filesystem)->dumpFile(
+            $path,
+            json_encode($json, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+    }
 }

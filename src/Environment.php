@@ -25,11 +25,6 @@ final class Environment
         return $this->getContentPath('db.php');
     }
 
-    public function getDatabasePath(): string
-    {
-        return $this->getContentPath('database', '.ht.sqlite');
-    }
-
     public function getPath(string ...$pathParts): string
     {
         return Path::join($this->path, ...$pathParts);

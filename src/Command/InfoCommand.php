@@ -3,7 +3,6 @@
 namespace Eznv\Command;
 
 use Exception;
-use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\Eznv;
 use Eznv\ProcessFactory;
@@ -30,6 +29,12 @@ final class InfoCommand
         $dataDirectory = Eznv::instance()->baseDirectory;
 
         $processFactory = new ProcessFactory($environment->path);
+
+        $dbPath = $processFactory
+            ->create('wp', 'eval', 'echo defined("FQDB") ? FQDB : "(UNKNOWN)";')
+            ->mustRun()
+            ->getOutput();
+
         $wpVersionProcess = $processFactory->create('wp', 'core', 'version')->mustRun();
         $sqliteVersionProcess = $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version')->mustRun();
 
@@ -48,7 +53,7 @@ final class InfoCommand
             ['WordPress Path' => Path::makeRelative($environment->getWordPressPath(), $dataDirectory)],
             ['WP Config Path' => Path::makeRelative($environment->getWpConfigPath(), $dataDirectory)],
             ['DB Dropin Path' => Path::makeRelative($environment->getDatabaseDropinPath(), $dataDirectory)],
-            ['Database Path' => Path::makeRelative($environment->getDatabasePath(), $dataDirectory)],
+            ['Database Path' => Path::makeRelative($dbPath, $dataDirectory)],
             ['WP Version' => trim($wpVersionProcess->getOutput())],
             ['SQLite Integration Version' => trim($sqliteVersionProcess->getOutput())],
         );

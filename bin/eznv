@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+use Eznv\Application;
 use Eznv\Command\AdoptCommand;
 use Eznv\Command\ComposerCommand;
 use Eznv\Command\DestroyCommand;
@@ -16,7 +17,6 @@ use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
 use Eznv\Eznv;
 use Eznv\Support;
-use Symfony\Component\Console\Application;
 
 $autoloader = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
 

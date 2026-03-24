@@ -9,9 +9,7 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-// @todo "list" name conflicts with the built-in symfony/console list command which lists all registered commands
-// but i dont really like env-list
-#[AsCommand(name: 'env-list', description: 'List all eznv environments')]
+#[AsCommand(name: 'list', description: 'List all eznv environments')]
 final class ListCommand
 {
     public function __invoke(SymfonyStyle $io, #[Option] bool $orphaned = false): int

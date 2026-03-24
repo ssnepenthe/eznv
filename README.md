@@ -115,5 +115,5 @@ eznv for /path/to/eznv shell
 You can list all valid identifiers for all initialized environments:
 
 ```
-eznv env-list
+eznv list
 ```

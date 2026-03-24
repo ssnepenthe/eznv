@@ -40,7 +40,7 @@ final class LogsCommand
 
         $debugLog = json_decode(
             trim($processFactory->create('wp', 'config', 'get', 'WP_DEBUG_LOG', '--format=json')->mustRun()->getOutput()),
-            JSON_THROW_ON_ERROR
+            flags: JSON_THROW_ON_ERROR
         );
 
         // @ref wp_debug_mode()

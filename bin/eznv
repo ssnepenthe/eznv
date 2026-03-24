@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+use Eznv\Command\AdoptCommand;
 use Eznv\Command\ComposerCommand;
 use Eznv\Command\DestroyCommand;
 use Eznv\Command\ForCommand;
@@ -9,6 +10,7 @@ use Eznv\Command\InitCommand;
 use Eznv\Command\ListCommand;
 use Eznv\Command\LogsCommand;
 use Eznv\Command\PostUpdateCommand;
+use Eznv\Command\PruneCommand;
 use Eznv\Command\ServeCommand;
 use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
@@ -50,6 +52,7 @@ if (! $isBuiltinCommand && ! $canBypassUpdate && $eznv->isUpdateRequired()) {
 
 $application = new Application;
 $application->addCommands([
+    new AdoptCommand,
     new ComposerCommand,
     new DestroyCommand,
     new ForCommand,
@@ -58,6 +61,7 @@ $application->addCommands([
     new ListCommand,
     new LogsCommand,
     new PostUpdateCommand,
+    new PruneCommand,
     new ServeCommand,
     new ShellCommand,
     new WpCommand,

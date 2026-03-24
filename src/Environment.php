@@ -59,4 +59,9 @@ final class Environment
     {
         return is_dir($this->path) && file_exists($this->getComposerJsonPath());
     }
+
+    public function isOrphaned(): bool
+    {
+        return $this->project instanceof Project && ! is_dir($this->project->path);
+    }
 }

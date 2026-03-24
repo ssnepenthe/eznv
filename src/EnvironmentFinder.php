@@ -68,6 +68,11 @@ final class EnvironmentFinder
         return $this->findBy(fn (Environment $environment) => $hash === $environment->project->hash, $hash);
     }
 
+    public function findOrphaned(): array
+    {
+        return array_filter($this->findAll(), fn (Environment $environment) => $environment->isOrphaned());
+    }
+
     private function findBy(Closure $callback, string $identifier): Environment
     {
         $found = array_find($this->findAll(), $callback);

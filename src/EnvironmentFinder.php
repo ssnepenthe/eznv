@@ -2,6 +2,9 @@
 
 namespace Eznv;
 
+use Closure;
+use RuntimeException;
+
 final class EnvironmentFinder
 {
     private Eznv $config;
@@ -45,23 +48,34 @@ final class EnvironmentFinder
         return $environments;
     }
 
-    public function findByProjectDirectory(string $directory)
+    public function findByProjectDirectory(string $directory): Environment
     {
-        return array_find($this->findAll(), fn (Environment $environment) => $directory === $environment->project->path);
+        return $this->findBy(fn (Environment $environment) => $directory === $environment->project->path, $directory);
     }
 
-    public function findByProjectName(string $name)
+    public function findByProjectName(string $name): Environment
     {
-        return array_find($this->findAll(), fn (Environment $environment) => $name === $environment->project->name);
+        return $this->findBy(fn (Environment $environment) => $name === $environment->project->name, $name);
     }
 
-    public function findByProjectId(string $id)
+    public function findByProjectId(string $id): Environment
     {
-        return array_find($this->findAll(), fn (Environment $environment) => $id === $environment->project->id);
+        return $this->findBy(fn (Environment $environment) => $id === $environment->project->id, $id);
     }
 
-    public function findByProjectHash(string $hash)
+    public function findByProjectHash(string $hash): Environment
     {
-        return array_find($this->findAll(), fn (Environment $environment) => $hash === $environment->project->hash);
+        return $this->findBy(fn (Environment $environment) => $hash === $environment->project->hash, $hash);
+    }
+
+    private function findBy(Closure $callback, string $identifier): Environment
+    {
+        $found = array_find($this->findAll(), $callback);
+
+        if (! $found instanceof Environment) {
+            throw new RuntimeException("Unable to find environment {$identifier}");
+        }
+
+        return $found;
     }
 }

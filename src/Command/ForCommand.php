@@ -2,6 +2,7 @@
 
 namespace Eznv\Command;
 
+use Exception;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use RuntimeException;
@@ -60,16 +61,17 @@ class ForCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
         $identifier = $input->getArgument('project');
-        $environment = (new EnvironmentFinder)->find($identifier);
 
-        if (! $environment instanceof Environment) {
-            $io->error("Unable to find environment {$identifier}");
+        try {
+            $environment = (new EnvironmentFinder)->find($identifier);
+        } catch (Exception $e) {
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }
 
-        if (! $environment->isInitialized()) {
-            $io->error("Environment {$identifier} has not been initialized");
+        if ($environment->isOrphaned()) {
+            $io->error('@todo');
 
             return Command::FAILURE;
         }

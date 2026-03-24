@@ -2,6 +2,7 @@
 
 namespace Eznv\Command;
 
+use Exception;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use Eznv\Eznv;
@@ -18,24 +19,10 @@ final class InfoCommand
 {
     public function __invoke(SymfonyStyle $io): int
     {
-        $identifier = getcwd();
-
-        if (false === $identifier) {
-            $io->error('Unable to determine project directory');
-
-            return Command::FAILURE;
-        }
-
-        $environment = (new EnvironmentFinder)->find($identifier);
-
-        if (! $environment instanceof Environment) {
-            $io->error("Unable to find environment {$identifier}");
-
-            return Command::FAILURE;
-        }
-
-        if (! $environment->isInitialized()) {
-            $io->error("Environment {$identifier} has not been initialized");
+        try {
+            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+        } catch (Exception $e) { // @todo more specific exception type
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }

@@ -2,7 +2,7 @@
 
 namespace Eznv\Command;
 
-use Eznv\Environment;
+use Exception;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
 use Eznv\Support;
@@ -22,18 +22,10 @@ final class ShellCommand
             return Command::FAILURE;
         }
 
-        $identifier = getcwd();
-
-        if (false === $identifier) {
-            $io->error('Unable to determine project directory');
-
-            return Command::FAILURE;
-        }
-
-        $environment = (new EnvironmentFinder)->find($identifier);
-
-        if (! $environment instanceof Environment) {
-            $io->error("Unable to find environment {$identifier}");
+        try {
+            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+        } catch (Exception $e) { // @todo more specific exception type
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }

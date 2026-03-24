@@ -3,11 +3,11 @@
 namespace Eznv\Command;
 
 use Closure;
+use Exception;
 use Eznv\EnvironmentManager;
 use Eznv\ProcessFactory;
 use Eznv\Support;
 use InvalidArgumentException;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\DebugFormatterHelper;
@@ -22,24 +22,20 @@ final class InitCommand
     private ?SymfonyStyle $io = null;
     private ?HelperSet $helperSet = null;
 
-    public function __invoke(SymfonyStyle $io, #[Argument] string $directory = ''): int
+    public function __invoke(SymfonyStyle $io): int
     {
         $this->io = $io;
 
-        if ('' === $directory) {
-            $directory = getcwd();
-        }
+        try {
+            $manager = new EnvironmentManager;
 
-        if (false === $directory) {
-            $io->error('Unable to determine project directory');
+            $project = $manager->createProject(Support::getCwd());
+            $environment = $manager->createForProject($project);
+        } catch (Exception $e) {
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }
-
-        $manager = new EnvironmentManager;
-
-        $project = $manager->createProject($directory);
-        $environment = $manager->createForProject($project);
 
         // @todo Prompt user to overwrite existing environment.
         if (file_exists($environment->path)) {
@@ -96,7 +92,7 @@ final class InitCommand
                     'url' => $environment->project->path,
                 ];
                 $composerJson['extra']['eznv'] = [
-                    'project' => $environment->project->path,
+                    'project' => $environment->project->toArray(),
                 ];
 
                 Support::writeJsonToFile($composerJson, $environment->getComposerJsonPath());

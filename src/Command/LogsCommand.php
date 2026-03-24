@@ -2,9 +2,10 @@
 
 namespace Eznv\Command;
 
-use Eznv\Environment;
+use Exception;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
+use Eznv\Support;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -17,24 +18,10 @@ final class LogsCommand
 {
     public function __invoke(OutputInterface $output, SymfonyStyle $io): int
     {
-        $identifier = getcwd();
-
-        if (false === $identifier) {
-            $io->error('Unable to determine project directory');
-
-            return Command::FAILURE;
-        }
-
-        $environment = (new EnvironmentFinder)->find($identifier);
-
-        if (! $environment instanceof Environment) {
-            $io->error("Unable to find environment {$identifier}");
-
-            return Command::FAILURE;
-        }
-
-        if (! $environment->isInitialized()) {
-            $io->error("Environment {$identifier} has not been initialized");
+        try {
+            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+        } catch (Exception $e) { // @todo more specific exception type
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }

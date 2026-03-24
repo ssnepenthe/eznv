@@ -3,8 +3,6 @@
 namespace Eznv;
 
 use RuntimeException;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Filesystem\Path;
 
 // @todo Better name?
 final class EnvironmentManager
@@ -18,18 +16,30 @@ final class EnvironmentManager
 
     public function create(string $directory)
     {
-        // @todo realpath()?
+        $directory = realpath($directory);
+
+        if (false === $directory) {
+            throw new RuntimeException('@todo realpath');
+        }
+
         $environment = new Environment($directory);
 
-        if (file_exists($environment->getComposerJsonPath())) {
-            $composer = Support::readJsonFile($environment->getComposerJsonPath());
-            $projectDirectory = $composer['extra']['eznv']['project'] ?? null;
-
-            if (is_string($projectDirectory)) {
-                // @todo I'm not sure there is a good reason to allow relative paths, but it makes testing a bit easier.
-                $environment->project = $this->createProject(Path::makeAbsolute($projectDirectory, $directory));
-            }
+        if (! is_dir($environment->path)) {
+            throw new RuntimeException('@todo env dir doesnt exist');
         }
+
+        if (! file_exists($environment->getComposerJsonPath())) {
+            throw new RuntimeException("Environment {$directory} has not been initialized");
+        }
+
+        $composer = Support::readJsonFile($environment->getComposerJsonPath());
+        $project = $composer['extra']['eznv']['project'] ?? [];
+
+        if (! is_array($project)) {
+            throw new RuntimeException('@todo old style project metadata');
+        }
+
+        $environment->project = Project::fromArray($project);
 
         return $environment;
     }
@@ -38,7 +48,8 @@ final class EnvironmentManager
     {
         $directory = $this->config->path($project->hash);
 
-        // @todo realpath()?
+        // @todo realpath()? This is only used when first creating a project so directory doesn't need to exist.
+        // maybe use Path class to normalize instead?
         $environment = new Environment($directory, $project);
 
         return $environment;

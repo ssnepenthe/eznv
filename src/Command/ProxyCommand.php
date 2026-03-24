@@ -2,9 +2,10 @@
 
 namespace Eznv\Command;
 
-use Eznv\Environment;
+use Exception;
 use Eznv\EnvironmentFinder;
 use Eznv\ProcessFactory;
+use Eznv\Support;
 use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -42,18 +43,10 @@ abstract class ProxyCommand extends Command
             return Command::FAILURE;
         }
 
-        $directory = getcwd();
-
-        if (false === $directory) {
-            $io->error('Unable to determine project directory');
-
-            return Command::FAILURE;
-        }
-
-        $environment = (new EnvironmentFinder)->findByProjectDirectory($directory);
-
-        if (! $environment instanceof Environment) {
-            $io->error("Unable to find environment {$directory}");
+        try {
+            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+        } catch (Exception $e) { // @todo more specific exception type
+            $io->error($e->getMessage());
 
             return Command::FAILURE;
         }

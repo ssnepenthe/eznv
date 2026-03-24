@@ -19,6 +19,17 @@ final class Support
         }
     }
 
+    public static function getCwd(): string
+    {
+        $directory = getcwd();
+
+        if (false === $directory) {
+            throw new RuntimeException('Unable to determine project directory');
+        }
+
+        return $directory;
+    }
+
     /**
      * @return string|false
      */

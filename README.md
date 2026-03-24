@@ -117,3 +117,18 @@ You can list all valid identifiers for all initialized environments:
 ```
 eznv list
 ```
+
+If you initialize an environment for a project directory and later move or delete that project directory, the environment will become orphaned.
+
+If you moved/renamed the project directory, you may want to reclaim the orphaned environment (using the identifier found above):
+
+```
+cd /new/project/path
+eznv adopt ssnepenthe/eznv
+```
+
+If you have deleted the project entirely, you will want to remove the orphaned environment instead:
+
+```
+eznv prune
+```

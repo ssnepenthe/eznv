@@ -67,7 +67,7 @@ eznv logs
 You can use eznv to run composer commands within your environment:
 
 ```
-eznv composer require wpackagist-plugin/query-monitor
+eznv composer require wp-plugin/query-monitor
 ```
 
 As well as WP-CLI commands:

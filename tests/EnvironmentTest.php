@@ -25,7 +25,7 @@ class EnvironmentTest extends TestCase
     public function testGetWordPressPath()
     {
         $path = '/some/random/path';
-        $wpPath = $path . '/wordpress';
+        $wpPath = $path . '/public/wordpress';
 
         $environment = new Environment($path);
 

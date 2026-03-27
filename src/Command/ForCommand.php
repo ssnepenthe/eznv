@@ -3,7 +3,6 @@
 namespace Eznv\Command;
 
 use Exception;
-use Eznv\Environment;
 use Eznv\EnvironmentFinder;
 use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;

@@ -10,7 +10,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 
-// @todo default command timeout @ 10 minutes or so?
 #[AsCommand(name: 'destroy', description: 'Destroy the environment for the current directory')]
 final class DestroyCommand
 {

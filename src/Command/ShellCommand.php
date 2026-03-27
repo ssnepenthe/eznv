@@ -14,6 +14,9 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'shell')]
 final class ShellCommand
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(SymfonyStyle $io): int
     {
         if (! Process::isTtySupported()) {
@@ -23,7 +26,7 @@ final class ShellCommand
         }
 
         try {
-            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+            $environment = $this->finder->findByProjectDirectory(Support::getCwd());
         } catch (Exception $e) { // @todo more specific exception type
             $io->error($e->getMessage());
 

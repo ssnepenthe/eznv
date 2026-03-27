@@ -12,9 +12,8 @@ final class Eznv
     public int $installedVersion;
 
     public readonly string $baseDirectory;
-    private static ?self $instance = null;
 
-    private function __construct()
+    public function __construct()
     {
         $xdgDataHome = Support::getEnv('XDG_DATA_HOME');
 
@@ -72,15 +71,6 @@ final class Eznv
     public function path(string ...$pathParts): string
     {
         return Path::join($this->baseDirectory, ...$pathParts);
-    }
-
-    public static function instance()
-    {
-        if (! self::$instance instanceof self) {
-            self::$instance = new self;
-        }
-
-        return self::$instance;
     }
 
     private function readEznvJson()

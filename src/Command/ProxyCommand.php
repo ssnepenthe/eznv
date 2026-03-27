@@ -18,6 +18,11 @@ use Symfony\Component\Process\Process;
 
 abstract class ProxyCommand extends Command
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {
+        return parent::__construct();
+    }
+
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         if ('' === $this->getProxyCommand()) {
@@ -44,7 +49,7 @@ abstract class ProxyCommand extends Command
         }
 
         try {
-            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+            $environment = $this->finder->findByProjectDirectory(Support::getCwd());
         } catch (Exception $e) { // @todo more specific exception type
             $io->error($e->getMessage());
 

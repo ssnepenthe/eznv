@@ -17,10 +17,13 @@ use Symfony\Component\Filesystem\Filesystem;
 #[AsCommand(name: 'adopt', description: 'Adopt an orphaned environment')]
 final class AdoptCommand
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(SymfonyStyle $io, #[Argument] string $identifier): int
     {
         try {
-            $originalEnvironment = (new EnvironmentFinder)->find($identifier);
+            $originalEnvironment = $this->finder->find($identifier);
         } catch (Exception $e) {
             $io->error($e->getMessage());
 

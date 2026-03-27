@@ -18,17 +18,20 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'info', description: 'Display information about the current WordPress environment')]
 final class InfoCommand
 {
+    public function __construct(private Eznv $config, private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(SymfonyStyle $io): int
     {
         try {
-            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+            $environment = $this->finder->findByProjectDirectory(Support::getCwd());
         } catch (Exception $e) { // @todo more specific exception type
             $io->error($e->getMessage());
 
             return Command::FAILURE;
         }
 
-        $dataDirectory = Eznv::instance()->baseDirectory;
+        $dataDirectory = $this->config->baseDirectory;
 
         $processFactory = new ProcessFactory($environment->path);
 

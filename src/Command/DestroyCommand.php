@@ -13,10 +13,13 @@ use Symfony\Component\Filesystem\Filesystem;
 #[AsCommand(name: 'destroy', description: 'Destroy the environment for the current directory')]
 final class DestroyCommand
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(SymfonyStyle $io): int
     {
         try {
-            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+            $environment = $this->finder->findByProjectDirectory(Support::getCwd());
         } catch (Exception $e) { // @todo more specific exception type
             $io->error($e->getMessage());
 

@@ -7,12 +7,8 @@ use RuntimeException;
 
 final class EnvironmentFinder
 {
-    private Eznv $config;
-
-    public function __construct(?Eznv $config = null)
-    {
-        $this->config = $config ?? Eznv::instance();
-    }
+    public function __construct(private Eznv $config)
+    {}
 
     // @todo Do we actually want a nullable return or should we throw?
     public function find(string $identifier): ?Environment

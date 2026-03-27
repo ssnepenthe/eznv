@@ -18,6 +18,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'for', description: 'Allows running commands in a specific project directory')]
 class ForCommand extends Command
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {
+        return parent::__construct();
+    }
+
     public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void
     {
         if ($input->mustSuggestArgumentValuesFor('project')) {
@@ -62,7 +67,7 @@ class ForCommand extends Command
         $identifier = $input->getArgument('project');
 
         try {
-            $environment = (new EnvironmentFinder)->find($identifier);
+            $environment = $this->finder->find($identifier);
         } catch (Exception $e) {
             $io->error($e->getMessage());
 
@@ -134,7 +139,7 @@ class ForCommand extends Command
     {
         $currentValue = $input->getCompletionValue();
         $suggestions = [];
-        $environments = (new EnvironmentFinder)->findAll();
+        $environments = $this->finder->findAll();
 
         if ('' === $currentValue) {
             foreach ($environments as $environment) {

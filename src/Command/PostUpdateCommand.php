@@ -23,12 +23,8 @@ final class PostUpdateCommand
     private const int FROM = 0;
     private const int TO = 1;
 
-    private Eznv $config;
-
-    public function __construct(?Eznv $config = null)
-    {
-        $this->config = $config ?? Eznv::instance();
-    }
+    public function __construct(private Eznv $config)
+    {}
 
     public function __invoke(SymfonyStyle $io, #[Option] bool $dryRun = false): int
     {

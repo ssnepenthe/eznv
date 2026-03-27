@@ -19,6 +19,9 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'serve', description: 'Start a WordPress server for the current directory.')]
 final class ServeCommand
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(
         OutputInterface $output,
         SymfonyStyle $io,
@@ -26,7 +29,7 @@ final class ServeCommand
         #[Option] int $port = 8080
     ): int {
         try {
-            $environment = (new EnvironmentFinder)->findByProjectDirectory(Support::getCwd());
+            $environment = $this->finder->findByProjectDirectory(Support::getCwd());
         } catch (Exception $e) { // @todo more specific exception type
             $io->error($e->getMessage());
 

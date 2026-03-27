@@ -12,9 +12,12 @@ use Symfony\Component\Filesystem\Filesystem;
 #[AsCommand(name: 'prune', description: 'Clean up orphaned environments')]
 final class PruneCommand
 {
+    public function __construct(private EnvironmentFinder $finder)
+    {}
+
     public function __invoke(SymfonyStyle $io): int
     {
-        $orphaned = (new EnvironmentFinder)->findOrphaned();
+        $orphaned = $this->finder->findOrphaned();
 
         if ([] === $orphaned) {
             $io->writeln('No orphaned environments found');

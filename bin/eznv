@@ -15,7 +15,9 @@ use Eznv\Command\PruneCommand;
 use Eznv\Command\ServeCommand;
 use Eznv\Command\ShellCommand;
 use Eznv\Command\WpCommand;
+use Eznv\Environment;
 use Eznv\Eznv;
+use Eznv\Project;
 use Eznv\Support;
 
 $autoloader = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
@@ -49,6 +51,8 @@ if (! $isBuiltinCommand && ! $canBypassUpdate && $eznv->isUpdateRequired()) {
     echo "A recent update introduced breaking changes. Please run '{$argv[0]} post-update' to ensure your existing environments are up-to-date." . PHP_EOL;
     exit(1);
 }
+
+Environment::resolveEnvironmentDirectoryUsing(fn (Project $project) => $eznv->path($project->hash));
 
 $application = new Application;
 $application->addCommands([

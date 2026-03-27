@@ -4,8 +4,9 @@ namespace Eznv\Command;
 
 use Closure;
 use Exception;
-use Eznv\EnvironmentManager;
+use Eznv\Environment;
 use Eznv\ProcessFactory;
+use Eznv\Project;
 use Eznv\Support;
 use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,10 +28,8 @@ final class InitCommand
         $this->io = $io;
 
         try {
-            $manager = new EnvironmentManager;
-
-            $project = $manager->createProject(Support::getCwd());
-            $environment = $manager->createForProject($project);
+            $project = Project::fromCwd();
+            $environment = Environment::fromProject($project);
         } catch (Exception $e) {
             $io->error($e->getMessage());
 

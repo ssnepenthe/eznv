@@ -3,9 +3,10 @@
 namespace Eznv\Command;
 
 use Exception;
+use Eznv\Environment;
 use Eznv\EnvironmentFinder;
-use Eznv\EnvironmentManager;
 use Eznv\ProcessFactory;
+use Eznv\Project;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -33,10 +34,8 @@ final class AdoptCommand
         }
 
         try {
-            $em = new EnvironmentManager;
-
-            $newProject = $em->createProject(Support::getCwd());
-            $newEnvironment = $em->createForProject($newProject);
+            $newProject = Project::fromCwd();
+            $newEnvironment = Environment::fromProject($newProject);
         } catch (Exception $e) {
             $io->error($e->getMessage());
 

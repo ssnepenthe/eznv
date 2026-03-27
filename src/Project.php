@@ -47,4 +47,31 @@ final readonly class Project
 
         return new self(...$array);
     }
+
+    public static function fromCwd(): self
+    {
+        $directory = Support::getCwd();
+
+        // @todo realpath()?
+        if (! is_dir($directory)) {
+            throw new RuntimeException();
+        }
+
+        if (! file_exists($directory . '/composer.json')) {
+            throw new RuntimeException();
+        }
+
+        $composerJson = Support::readJsonFile($directory . '/composer.json');
+
+        // @todo Does composer even allow you to set an empty name and type?
+        if (! isset($composerJson['name']) || '' === $composerJson['name']) {
+            throw new RuntimeException();
+        }
+
+        if (isset($composerJson['type']) && '' === $composerJson['type']) {
+            throw new RuntimeException();
+        }
+
+        return new self($directory, $composerJson['name'], $composerJson['type'] ?? 'library');
+    }
 }

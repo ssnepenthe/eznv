@@ -2,6 +2,7 @@
 
 namespace Eznv;
 
+use Generator;
 use RuntimeException;
 use Symfony\Component\Filesystem\Path;
 
@@ -33,6 +34,29 @@ final class Eznv
 
         $this->version = 1;
         $this->readEznvJson();
+    }
+
+    public function environmentPaths(): Generator
+    {
+        $environments = scandir($this->baseDirectory);
+
+        if (false === $environments) {
+            throw new RuntimeException();
+        }
+
+        foreach ($environments as $directory) {
+            if ('.' === $directory || '..' === $directory) {
+                continue;
+            }
+
+            $path = $this->path($directory);
+
+            if (! is_dir($path)) {
+                continue;
+            }
+
+            yield $path;
+        }
     }
 
     public function flushEznvJson()

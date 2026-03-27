@@ -8,12 +8,10 @@ use RuntimeException;
 final class EnvironmentFinder
 {
     private Eznv $config;
-    private EnvironmentManager $manager;
 
     public function __construct(?Eznv $config = null)
     {
         $this->config = $config ?? Eznv::instance();
-        $this->manager = new EnvironmentManager();
     }
 
     // @todo Do we actually want a nullable return or should we throw?
@@ -31,18 +29,8 @@ final class EnvironmentFinder
     {
         $environments = [];
 
-        foreach (scandir($this->config->baseDirectory) as $file) {
-            if ('.' === $file || '..' === $file) {
-                continue;
-            }
-
-            $fullpath = $this->config->path($file);
-
-            if (! is_dir($fullpath)) {
-                continue;
-            }
-
-            $environments[] = $this->manager->create($fullpath);
+        foreach ($this->config->environmentPaths() as $path) {
+            $environments[] = Environment::fromDirectory($path);
         }
 
         return $environments;

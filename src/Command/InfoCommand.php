@@ -12,6 +12,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'info', description: 'Display information about the current WordPress environment')]
 final class InfoCommand
@@ -30,13 +32,11 @@ final class InfoCommand
 
         $processFactory = new ProcessFactory($environment->path);
 
-        $dbPath = $processFactory
-            ->create('wp', 'eval', 'echo defined("FQDB") ? FQDB : "(UNKNOWN)";')
-            ->mustRun()
-            ->getOutput();
-
-        $wpVersionProcess = $processFactory->create('wp', 'core', 'version')->mustRun();
-        $sqliteVersionProcess = $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version')->mustRun();
+        [$dbPath, $wpVersion, $sqliteIntegrationVersion] = $this->run([
+            $processFactory->create('wp', 'eval', 'echo defined("FQDB") ? FQDB : "(UNKNOWN)";', '--skip-plugins', '--skip-themes', '--skip-packages'),
+            $processFactory->create('wp', 'core', 'version', '--skip-plugins', '--skip-themes', '--skip-packages'),
+            $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version', '--skip-plugins', '--skip-themes', '--skip-packages'),
+        ]);
 
         $io->definitionList(
             'EZNV',
@@ -54,10 +54,40 @@ final class InfoCommand
             ['WP Config Path' => Path::makeRelative($environment->getWpConfigPath(), $dataDirectory)],
             ['DB Dropin Path' => Path::makeRelative($environment->getDatabaseDropinPath(), $dataDirectory)],
             ['Database Path' => Path::makeRelative($dbPath, $dataDirectory)],
-            ['WP Version' => trim($wpVersionProcess->getOutput())],
-            ['SQLite Integration Version' => trim($sqliteVersionProcess->getOutput())],
+            ['WP Version' => $wpVersion],
+            ['SQLite Integration Version' => $sqliteIntegrationVersion],
         );
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param Process[] $processes
+     * @return string[]
+     */
+    private function run(array $processes): array
+    {
+        $results = [];
+        array_walk($processes, fn (Process $process) => $process->start());
+
+        while ([] !== $processes) {
+            foreach ($processes as $key => $process) {
+                if ($process->isRunning()) {
+                    try{
+                        $process->checkTimeout();
+                    } catch (ProcessTimedOutException) {
+                        $results[$key] = 'UNKNOWN: Process timed out';
+                        unset($processes[$key]);
+                    }
+                } else {
+                    $results[$key] = trim(0 === $process->getExitCode() ? $process->getOutput() : 'UNKNOWN: Process exited unsuccessfully');
+                    unset($processes[$key]);
+                }
+            }
+
+            usleep(50000);
+        }
+
+        return $results;
     }
 }

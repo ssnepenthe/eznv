@@ -1,0 +1,9 @@
+{
+    "name": "eznv/old-style-metadata",
+    "require": {},
+    "extra": {
+        "eznv": {
+            "project": "/this/path/is/irrelevant/to/the/test"
+        }
+    }
+}

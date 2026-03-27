@@ -61,21 +61,22 @@ final class Environment
 
     public function isOrphaned(): bool
     {
-        return $this->project instanceof Project && ! is_dir($this->project->path);
+        return ! $this->project instanceof Project || ! is_dir($this->project->path);
     }
 
     public static function fromDirectory(string $directory): self
     {
+        $original = $directory;
         $directory = realpath($directory);
 
         if (false === $directory) {
-            throw new RuntimeException('@todo realpath');
+            throw new RuntimeException("File {$original} does not exist");
         }
 
         $environment = new self($directory);
 
         if (! is_dir($environment->path)) {
-            throw new RuntimeException('@todo env dir doesnt exist');
+            throw new RuntimeException("File {$directory} is not a directory");
         }
 
         if (! file_exists($environment->getComposerJsonPath())) {
@@ -86,8 +87,15 @@ final class Environment
         $project = $composer['extra']['eznv']['project'] ?? [];
 
         if (! is_array($project)) {
-            throw new RuntimeException('@todo old style project metadata');
+            throw new RuntimeException("Environment at {$directory} was created with an older version of eznv - did you run `eznv post-update`?");
         }
+
+        if (! array_key_exists('path', $project)) {
+            throw new RuntimeException("Environment at {$directory} contains invalid project metadata");
+        }
+
+        // Not really necessary but makes testing a bit simpler.
+        $project['path'] = Path::makeAbsolute($project['path'], $directory);
 
         $environment->project = Project::fromArray($project);
 
@@ -104,13 +112,13 @@ final class Environment
     public static function resolveEnvironmentDirectory(Project $project): string
     {
         if (! self::$environmentDirectoryResolver instanceof Closure) {
-            throw new RuntimeException();
+            throw new RuntimeException('Environment directory resolver not set - call ' . __CLASS__ . '::resolveEnvironmentDirectoryUsing()');
         }
 
         return (self::$environmentDirectoryResolver)($project);
     }
 
-    public static function resolveEnvironmentDirectoryUsing(Closure $callback)
+    public static function resolveEnvironmentDirectoryUsing(?Closure $callback)
     {
         self::$environmentDirectoryResolver = $callback;
     }

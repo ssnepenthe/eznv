@@ -4,7 +4,6 @@
     "extra": {
         "eznv": {
             "project": {
-                "path": "../project",
                 "name": "eznv/project",
                 "type": "library"
             }

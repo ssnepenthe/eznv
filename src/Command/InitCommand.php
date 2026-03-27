@@ -81,7 +81,7 @@ final class InitCommand
                 $composerJson['name'] = "eznv/{$environment->project->id}";
                 $composerJson['require'][$environment->project->name] = '*';
 
-                if ('theme' === $environment->project->type) {
+                if ('wordpress-theme' === $environment->project->type) {
                     unset($composerJson['require']['wp-theme/twentytwentyfive']);
                 }
 

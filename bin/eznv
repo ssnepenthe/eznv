@@ -31,7 +31,7 @@ if ($firstRun) {
 
 // Always allow symfony/console default commands - running with no command is the same as running the help command.
 // Doesn't account for running eznv commands with the --help flag, but that's probably fine...
-$isBuiltinCommand = 1 === count($argv) || count($argv) >= 2 && in_array($argv[1], ['_complete', 'completion', 'help', 'list'], true);
+$isBuiltinCommand = 1 === count($argv) || count($argv) >= 2 && in_array($argv[1], ['_complete', 'completion', 'help', 'cmd-list'], true);
 
 // Init command will always be up-to-date and post-update command is required to get everything in working order after updating.
 $canBypassUpdate = count($argv) >= 2 && in_array($argv[1], ['init', 'post-update'], true);

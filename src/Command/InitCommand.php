@@ -5,9 +5,9 @@ namespace Eznv\Command;
 use Closure;
 use Exception;
 use Eznv\Environment;
+use Eznv\Filesystem;
 use Eznv\ProcessFactory;
 use Eznv\Project;
-use Eznv\Support;
 use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,6 +22,9 @@ final class InitCommand
 {
     private ?SymfonyStyle $io = null;
     private ?HelperSet $helperSet = null;
+
+    public function __construct(private Filesystem $fs)
+    {}
 
     public function __invoke(SymfonyStyle $io): int
     {
@@ -46,7 +49,7 @@ final class InitCommand
         $this->step(
             label: 'Creating environment directory',
             step: function () use ($environment) {
-                Support::ensureDirectoryExists($environment->path);
+                $this->fs->ensureDirectoryExists($environment->path);
             },
         );
 
@@ -76,7 +79,7 @@ final class InitCommand
         $this->step(
             label: 'Updating composer.json',
             step: function () use ($environment) {
-                $composerJson = Support::readJsonFile($environment->getComposerJsonPath());
+                $composerJson = $this->fs->readJsonFile($environment->getComposerJsonPath());
 
                 $composerJson['name'] = "eznv/{$environment->project->id}";
                 $composerJson['require'][$environment->project->name] = '*';
@@ -94,10 +97,10 @@ final class InitCommand
                     'project' => $environment->project->toArray(),
                 ];
 
-                Support::writeJsonToFile($composerJson, $environment->getComposerJsonPath());
+                $this->fs->writeJsonToFile($composerJson, $environment->getComposerJsonPath());
             },
             // @todo gross? maybe just compare mtime before and after step?
-            isSuccess: fn () => Support::readJsonFile($environment->getComposerJsonPath())['name'] === "eznv/{$environment->project->id}",
+            isSuccess: fn () => $this->fs->readJsonFile($environment->getComposerJsonPath())['name'] === "eznv/{$environment->project->id}",
         );
 
         $this->step(

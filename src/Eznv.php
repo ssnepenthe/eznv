@@ -13,7 +13,7 @@ final class Eznv
 
     public readonly string $baseDirectory;
 
-    public function __construct()
+    public function __construct(private Filesystem $fs)
     {
         $xdgDataHome = Support::getEnv('XDG_DATA_HOME');
 
@@ -60,7 +60,7 @@ final class Eznv
 
     public function flushEznvJson()
     {
-        Support::writeJsonToFile(['version' => $this->installedVersion], $this->path('eznv.json'));
+        $this->fs->writeJsonToFile(['version' => $this->installedVersion], $this->path('eznv.json'));
     }
 
     public function isUpdateRequired(): bool
@@ -79,7 +79,7 @@ final class Eznv
         $installedVersion = 0;
 
         if (file_exists($metadataFile)) {
-            $metadata = Support::readJsonFile($metadataFile);
+            $metadata = $this->fs->readJsonFile($metadataFile);
 
             if (array_key_exists('version', $metadata) && is_int($metadata['version'])) {
                 $installedVersion = $metadata['version'];

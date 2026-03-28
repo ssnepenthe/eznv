@@ -3,7 +3,7 @@
 namespace Eznv\Command;
 
 use Eznv\Eznv;
-use Eznv\Support;
+use Eznv\Filesystem;
 use Generator;
 use LogicException;
 use RuntimeException;
@@ -11,7 +11,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(
     name: 'post-update',
@@ -23,7 +22,7 @@ final class PostUpdateCommand
     private const int FROM = 0;
     private const int TO = 1;
 
-    public function __construct(private Eznv $config)
+    public function __construct(private Eznv $config, private Filesystem $fs)
     {}
 
     public function __invoke(SymfonyStyle $io, #[Option] bool $dryRun = false): int
@@ -55,7 +54,7 @@ final class PostUpdateCommand
                 continue;
             }
 
-            $composerJson = Support::readJsonFile($composerJsonPath);
+            $composerJson = $this->fs->readJsonFile($composerJsonPath);
             $project = $composerJson['extra']['eznv']['project'] ?? null;
 
             // v0 environment.
@@ -126,12 +125,10 @@ final class PostUpdateCommand
 
     private function applyOperations(array $operations)
     {
-        $filesystem = new Filesystem;
-
         foreach ($operations as $operation) {
             match ($operation['op']) {
-                'delete' => $filesystem->remove($operation['path']),
-                'update' => Support::writeJsonToFile($operation['contents'], $operation['path']),
+                'delete' => $this->fs->removeDirectory($operation['path']),
+                'update' => $this->fs->writeJsonToFile($operation['contents'], $operation['path']),
                 default => 'placeholder',
             };
         }
@@ -140,7 +137,7 @@ final class PostUpdateCommand
     private function createProjectArrayFromDirectory(string $directory): array
     {
         // We have previously verified that is_dir($directory) && file_exists("{$directory}/composer.json").
-        $composerJson = Support::readJsonFile("{$directory}/composer.json");
+        $composerJson = $this->fs->readJsonFile("{$directory}/composer.json");
 
         // We have previously verified that array_key_exists('name', $composerJson) && is_string($name) && '' !== $name.
         // I don't love duplicating the hash and id from project constructor, but I don't want to rely on the project
@@ -229,7 +226,7 @@ final class PostUpdateCommand
             return false;
         }
 
-        $name = Support::readJsonFile("{$directory}/composer.json")['name'] ?? null;
+        $name = $this->fs->readJsonFile("{$directory}/composer.json")['name'] ?? null;
 
         if (! is_string($name) || '' === $name) {
             return false;

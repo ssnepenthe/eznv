@@ -4,7 +4,7 @@ namespace Eznv;
 
 use Eznv\Command;
 use RuntimeException;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
 final class Container
 {
@@ -17,24 +17,25 @@ final class Container
     {
         $this->creators = [
             EnvironmentFinder::class => fn (Container $c) => new EnvironmentFinder($c->get(Eznv::class)),
-            Eznv::class => fn () => new Eznv(),
-            Filesystem::class => fn () => new Filesystem(),
+            Eznv::class => fn (Container $c) => new Eznv($c->get(Filesystem::class)),
+            Filesystem::class => fn () => new Filesystem(new SymfonyFilesystem),
 
             'commands' => function (Container $c) {
                 $environmentFinder = $c->get(EnvironmentFinder::class);
                 $eznv = $c->get(Eznv::class);
+                $fs = $c->get(Filesystem::class);
 
                 return [
-                    new Command\AdoptCommand($environmentFinder),
+                    new Command\AdoptCommand($environmentFinder, $fs),
                     new Command\ComposerCommand($environmentFinder),
-                    new Command\DestroyCommand($environmentFinder),
+                    new Command\DestroyCommand($environmentFinder, $fs),
                     new Command\ForCommand($environmentFinder),
                     new Command\InfoCommand($eznv, $environmentFinder),
-                    new Command\InitCommand(),
+                    new Command\InitCommand($fs),
                     new Command\ListCommand($environmentFinder),
                     new Command\LogsCommand($environmentFinder),
-                    new Command\PostUpdateCommand($eznv),
-                    new Command\PruneCommand($environmentFinder),
+                    new Command\PostUpdateCommand($eznv, $fs),
+                    new Command\PruneCommand($environmentFinder, $fs),
                     new Command\ServeCommand($environmentFinder),
                     new Command\ShellCommand($environmentFinder),
                     new Command\WpCommand($environmentFinder),

@@ -83,7 +83,7 @@ final class Environment
             throw new RuntimeException("Environment {$directory} has not been initialized");
         }
 
-        $composer = Support::readJsonFile($environment->getComposerJsonPath());
+        $composer = Container::instance()->get(Filesystem::class)->readJsonFile($environment->getComposerJsonPath());
         $project = $composer['extra']['eznv']['project'] ?? [];
 
         if (! is_array($project)) {

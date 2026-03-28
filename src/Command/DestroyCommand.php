@@ -4,16 +4,16 @@ namespace Eznv\Command;
 
 use Exception;
 use Eznv\EnvironmentFinder;
+use Eznv\Filesystem;
 use Eznv\Support;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(name: 'destroy', description: 'Destroy the environment for the current directory')]
 final class DestroyCommand
 {
-    public function __construct(private EnvironmentFinder $finder)
+    public function __construct(private EnvironmentFinder $finder, private Filesystem $fs)
     {}
 
     public function __invoke(SymfonyStyle $io): int
@@ -38,7 +38,7 @@ final class DestroyCommand
             return Command::SUCCESS;
         }
 
-        (new Filesystem)->remove($environment->path);
+        $this->fs->removeDirectory($environment->path);
 
         return Command::SUCCESS;
     }

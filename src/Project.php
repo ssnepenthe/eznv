@@ -61,7 +61,7 @@ final readonly class Project
             throw new RuntimeException();
         }
 
-        $composerJson = Support::readJsonFile($directory . '/composer.json');
+        $composerJson = Container::instance()->get(Filesystem::class)->readJsonFile($directory . '/composer.json');
 
         // @todo Does composer even allow you to set an empty name and type?
         if (! isset($composerJson['name']) || '' === $composerJson['name']) {

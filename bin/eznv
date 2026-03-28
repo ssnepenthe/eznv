@@ -5,8 +5,8 @@ use Eznv\Application;
 use Eznv\Container;
 use Eznv\Environment;
 use Eznv\Eznv;
+use Eznv\Filesystem;
 use Eznv\Project;
-use Eznv\Support;
 
 $autoloader = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
 
@@ -21,7 +21,7 @@ $container = Container::instance();
 $eznv = $container->get(Eznv::class);
 $firstRun = ! is_dir($eznv->baseDirectory);
 
-Support::ensureDirectoryExists($eznv->baseDirectory);
+$container->get(Filesystem::class)->ensureDirectoryExists($eznv->baseDirectory);
 
 if ($firstRun) {
     // We only want to create this file if the user has never used eznv before because we will use its absence later as

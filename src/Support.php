@@ -3,22 +3,10 @@
 namespace Eznv;
 
 use RuntimeException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
 final class Support
 {
-    public static function ensureDirectoryExists(string $directory)
-    {
-        if (! file_exists($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        if (! is_dir($directory)) {
-            throw new RuntimeException("File already exists at path {$directory}");
-        }
-    }
-
     public static function getCwd(): string
     {
         $directory = getcwd();
@@ -65,25 +53,5 @@ final class Support
         }
 
         return "~/{$relative}";
-    }
-
-    public static function readJsonFile(string $path): array
-    {
-        if (! file_exists($path)) {
-            throw new RuntimeException();
-        }
-
-        $contents = (new Filesystem)->readFile($path);
-        $decoded = json_decode($contents, true, flags: JSON_THROW_ON_ERROR);
-
-        return $decoded;
-    }
-
-    public static function writeJsonToFile(array $json, string $path): void
-    {
-        (new Filesystem)->dumpFile(
-            $path,
-            json_encode($json, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
     }
 }

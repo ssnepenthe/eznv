@@ -5,19 +5,18 @@ namespace Eznv\Command;
 use Exception;
 use Eznv\Environment;
 use Eznv\EnvironmentFinder;
+use Eznv\Filesystem;
 use Eznv\ProcessFactory;
 use Eznv\Project;
-use Eznv\Support;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(name: 'adopt', description: 'Adopt an orphaned environment')]
 final class AdoptCommand
 {
-    public function __construct(private EnvironmentFinder $finder)
+    public function __construct(private EnvironmentFinder $finder, private Filesystem $fs)
     {}
 
     public function __invoke(SymfonyStyle $io, #[Argument] string $identifier): int
@@ -59,7 +58,7 @@ final class AdoptCommand
             return Command::SUCCESS;
         }
 
-        $composerJson = Support::readJsonFile($originalEnvironment->getComposerJsonPath());
+        $composerJson = $this->fs->readJsonFile($originalEnvironment->getComposerJsonPath());
 
         $composerJson['name'] = "eznv/{$newEnvironment->project->id}";
 
@@ -86,13 +85,12 @@ final class AdoptCommand
 
         $composerJson['extra']['eznv']['project'] = $newEnvironment->project->toArray();
 
-        Support::writeJsonToFile($composerJson, $originalEnvironment->getComposerJsonPath());
+        $this->fs->writeJsonToFile($composerJson, $originalEnvironment->getComposerJsonPath());
 
         // @todo do we need to delete all locations where composer packages are installed? not sure if necessary, have to test
         // can use composer show --path --format=json to get list of all packages with installed paths.
 
-        $fs = new Filesystem;
-        $fs->rename($originalEnvironment->path, $newEnvironment->path);
+        $this->fs->moveDirectory($originalEnvironment->path, $newEnvironment->path);
 
         (new ProcessFactory($newEnvironment->path))
             ->create('composer', 'install', '--no-interaction', '--no-progress')

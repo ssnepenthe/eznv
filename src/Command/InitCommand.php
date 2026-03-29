@@ -63,10 +63,7 @@ final class InitCommand
                 'composer',
                 'create-project',
                 'ssnepenthe/wp-sqlite-starter',
-                $environment->path,
-                '--stability=dev',
-                '--prefer-dist',
-                '--repository={"type": "vcs", "url": "https://github.com/ssnepenthe/wp-sqlite-starter.git"}',
+                $environment->path, // @todo can this just be "."?
                 '--no-scripts',
                 '--no-progress',
                 '--remove-vcs',
@@ -116,6 +113,11 @@ final class InitCommand
         $this->step(
             label: 'Enabling WP_DEBUG',
             process: $processFactory->create('wp', 'config', 'set', 'WP_DEBUG', 'true', '--raw'),
+        );
+
+        $this->step(
+            label: 'Enabling WAL',
+            process: $processFactory->create('wp', 'config', 'set', 'SQLITE_JOURNAL_MODE', 'WAL'),
         );
 
         // @todo allow user to override all options?

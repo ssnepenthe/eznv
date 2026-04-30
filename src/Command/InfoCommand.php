@@ -38,7 +38,7 @@ final class InfoCommand
         [$dbPath, $wpVersion, $sqliteIntegrationVersion] = $this->run([
             $processFactory->create('wp', 'eval', 'echo defined("FQDB") ? FQDB : "(UNKNOWN)";', '--skip-plugins', '--skip-themes', '--skip-packages'),
             $processFactory->create('wp', 'core', 'version', '--skip-plugins', '--skip-themes', '--skip-packages'),
-            $processFactory->create('wp', 'plugin', 'get', 'sqlite-database-integration', '--field=version', '--skip-plugins', '--skip-themes', '--skip-packages'),
+            $processFactory->create('wp', 'eval', 'echo defined("SQLITE_DRIVER_VERSION") ? SQLITE_DRIVER_VERSION : "(UNKNOWN)";', '--skip-plugins', '--skip-themes', '--skip-packages'),
         ]);
 
         $io->definitionList(

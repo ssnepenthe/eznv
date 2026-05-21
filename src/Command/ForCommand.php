@@ -106,7 +106,7 @@ class ForCommand extends Command
 
         $tokens = $this->removeFirstOccurrences($tokens, [$this->getName(), $input->getArgument('project'), '|']);
 
-        return CompletionInput::fromTokens($tokens, 2);
+        return CompletionInput::fromTokens(array_values($tokens), 2);
     }
 
     private function removeFirstOccurrences(array $array, array $removals): array
